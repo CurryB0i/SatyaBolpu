@@ -3,6 +3,9 @@ const plugin = require('tailwindcss/plugin');
 
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  safelist : [
+    'h-[1500vh]'
+  ],
   theme: {
     extend: {
       colors: {
@@ -10,6 +13,9 @@ export default {
       },
       fontFamily: {
         cursive: '"Charm", serif',
+      },
+      height: {
+        '1500vh' : '1500vh'
       }
     },
   },
