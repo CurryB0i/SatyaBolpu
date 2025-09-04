@@ -167,7 +167,7 @@ const Home = () => {
                                 text-[2.5rem] md:text-[3rem] lg:text-[4rem] xl:text-[5rem] 2xl:text-[6rem] font-black
                                 z-10 [-webkit-text-fill-color:transparent] [-webkit-background-clip:text] bg-clip-text" 
                      ref={(el) => {if(el) headingRefs.current[2] = el}}>
-                  To The Eastern Coast
+                  To The Western Coast
                 </div>
               </div>
             </div>
