@@ -451,7 +451,7 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
         `}
       </style>
 
-      <div className="fullscreen z-10 absolute flex flex-col justify-center items-center
+      <div className="z-10 absolute flex flex-col justify-center items-center
         gap-2 right-0 top-16 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
         {fullScreen ? (
           <AiOutlineFullscreenExit 

@@ -218,7 +218,7 @@ const Dashboard = () => {
 
         </div>
 
-        <div className="w-[90%] xl:w-1/3 h-[75vh] py-10 flex flex-col gap-5 items-center 
+        <div data-lenis-prevent className="w-[90%] xl:w-1/3 h-[75vh] py-10 flex flex-col gap-5 items-center 
           justify-center outline outline-white rounded-2xl">
           <h1 className="text-[2rem] font-semibold">Recent Updates</h1>
           <div className="w-4/5 p-5 h-full flex flex-col items-center gap-5 
@@ -303,75 +303,8 @@ const Dashboard = () => {
             <FaHandsHelping />
             <p>Contribute</p>
           </div>
-
-          {
-            state.user?.role === 'admin' &&
-            <div className={`relative w-2/5 xl:w-1/5 outline outline-white flex 
-              items-center justify-center gap-1 cursor-pointer transition-all duration-500 
-              ${showAddMenu ? 'rounded-b-2xl bg-black text-primary' : 'rounded-2xl bg-white text-black'}`}
-              onClick={() => setShowAddMenu(!showAddMenu)}
-              ref={menuRef}
-            >
-              <div className="flex w-full items-center justify-center gap-1 hover:bg-black hover:text-primary
-                p-5">
-                <FaSquarePlus />
-                <p>Add</p>
-              </div>
-              <div className={`absolute bottom-full flex flex-col w-full rounded-t-2xl overflow-hidden
-                outline outline-white transition-all duration-300 text-black ${showAddMenu ? 'h-auto' : 'h-0 outline-0'}`}
-              >
-                <div className="w-full bg-white hover:bg-black hover:text-primary p-2
-                  flex items-center justify-center gap-1"
-                  onClick={() => setActiveForm('tag')}>
-                  <FaHashtag />
-                  <p>Add Tag</p>
-                </div>
-                <div className="w-full bg-white hover:bg-black hover:text-primary p-2
-                  flex items-center justify-center gap-1"
-                  onClick={() => setActiveForm('culture')}>
-                  <PiHandsPrayingBold />
-                  <p>Add Culture</p>
-                </div>
-              </div>
-            </div>
-          }
-
         </div>
-
       </div>
-
-      {
-        activeForm === 'tag' &&
-        <Form
-          onClose={closeForm}
-          title="Add New Tag"
-          fields={tagFormFields}
-          formData={tagFormData}
-          onChange={handleTagFormChange}
-          onSubmit={handleAddTag}
-          error={tagError}
-          loading={tagsApi.loading}
-          submitText="Add Tag"
-          loadingText="Adding..."
-        />
-      }
-
-      {
-        activeForm === 'culture' &&
-          <Form
-            onClose={closeForm}
-            title="Add New Culture"
-            fields={cultureFormFields}
-            formData={cultureFormData}
-            onChange={handleCultureFormChange}
-            onSubmit={handleAddCulture}
-            error={cultureError}
-            loading={culturesApi.loading}
-            submitText="Add Culture"
-            loadingText="Adding..."
-          />
-      }
-
     </>
   )
 }

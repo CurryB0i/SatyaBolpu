@@ -1,10 +1,11 @@
 import { Navigate, useParams } from "react-router-dom";
 import useApi from "../hooks/useApi";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { CultureType } from "./Explore";
 import { useLoading } from "../context/LoadingContext";
 import gsap from "gsap";
 import Button from "../components/Button";
+import { BASE_URL } from "../App";
 
 const Culture = () => {
   const { culture } = useParams();
@@ -14,6 +15,7 @@ const Culture = () => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const sectionsRef = useRef<HTMLDivElement[]>([]);
+  const imagesRef = useRef<HTMLDivElement[]>([]);
   
   useEffect(() => {
     setLoading(culturesApi.loading);
@@ -24,6 +26,14 @@ const Culture = () => {
       setCultureData(culturesApi.data.culture);
     }
   }, [culturesApi.data]);
+
+  const shuffle = useCallback((array: HTMLDivElement[]) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  },[]);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -51,35 +61,41 @@ const Culture = () => {
               duration: { min: 0.3, max: 0.5 },
               ease: "power2.inOut"
             },
-            markers: true
+            onUpdate: ({progress}) => {
+              const activeIndex = Math.round(progress*(totalSections-1));
+              sections.forEach((section,index) => {
+                const isActive = index === activeIndex;
+                gsap.to(section,
+                  {
+                    opacity: isActive ? 1 : 0,
+                  }
+                );
+              })
+
+              const shuffledImages = shuffle(imagesRef.current);
+              if(activeIndex === totalSections-1) {
+                gsap.to(shuffledImages,
+                  {
+                    scale: 1,
+                    stagger: 0.25,
+                    duration: 0.25,
+                  }
+                )
+              }
+            }
           }
         });
 
         sections.forEach((section, index) => {
           if(index !== sections.length-1) {
-          tl.to(section, {
-            width: 0,
-            ease: "power1.inOut"
-          });
+            tl.to(section, {
+              width: 0,
+              ease: "power1.inOut"
+            });
           }
         });
 
-        sections.forEach((section) => {
-          gsap.fromTo(section, 
-            { opacity: 0, y: 50 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 1,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: section,
-                start: "left center",
-                toggleActions: "play none none reverse"
-              }
-            }
-          );
-        });
+
       }
     });
 
@@ -116,7 +132,7 @@ const Culture = () => {
           style={{ width: `${3 * 100}vw` }}
         >
           <div 
-            className="w-screen h-screen text-primary/70 flex items-center justify-center font-black overflow-hidden"
+            className="w-screen h-screen text-primary/70 flex relative items-center justify-center font-black overflow-hidden"
             ref={(el) => { if(el) sectionsRef.current[0] = el }}
           >
             <div 
@@ -145,7 +161,7 @@ const Culture = () => {
           </div>
 
           <div 
-            className="w-screen h-screen text-primary font-black overflow-hidden"
+            className="w-screen h-screen text-primary relative font-black overflow-hidden"
             ref={(el) => { if(el) sectionsRef.current[1] = el }}
           >
             <div 
@@ -176,12 +192,27 @@ const Culture = () => {
           </div>
 
           <div 
-            className="w-screen h-screen text-primary font-black overflow-hidden"
+            className="w-screen h-screen text-primary relative font-black overflow-hidden"
             ref={(el) => { if(el) sectionsRef.current[2] = el }}
           >
             <div 
-              className="w-screen h-screen text-center absolute left-0 flex gap-5 flex-col justify-center items-center"
+              className="w-screen h-screen text-center absolute left-0 flex flex-wrap gap-1 
+                justify-evenly items-center"
             >
+              {
+                Array(100).fill(`${BASE_URL}${cultureData.image}`).map((item,index) => (
+                  <div 
+                    key={index} 
+                    className="w-[10%] scale-0 opacity-50" 
+                    ref={(el) => {if(el) imagesRef.current[index] = el }}>
+                    <img className="w-full h-full" src={item} alt="" />
+                  </div>
+                ))
+              }
+              <Button 
+                className="absolute text-[1.5rem]"
+                content="View Gallery"
+              />
             </div>
           </div>
 

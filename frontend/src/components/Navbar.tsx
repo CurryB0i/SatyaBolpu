@@ -2,7 +2,6 @@ import { CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'rea
 import { NavLink, useLocation } from 'react-router-dom';
 import { MdOutlineMenu } from "react-icons/md";
 import { MdOutlineHorizontalRule } from "react-icons/md";
-import { useLoading } from '../context/LoadingContext';
 import { useAuth } from '../context/AuthContext';
 import { CgProfile } from "react-icons/cg";
 
@@ -10,7 +9,6 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
-  const { isLoading } = useLoading();
   const { state } = useAuth();
   const [navbarStyles,setNavbarStyles] = useState<CSSProperties>({
     position: 'relative',
@@ -20,10 +18,15 @@ const Navbar = () => {
   useLayoutEffect(() => {
     const path = location.pathname;
     console.log(path)
-    if(path === '/' || path.startsWith('/explore/')) {
+    if(path === '/' || path.startsWith('/explore')) {
       setNavbarStyles({
         position: 'fixed',
         backgroundColor: 'transparent'
+      })
+    } else {
+      setNavbarStyles({
+        position: 'relative',
+        backgroundColor: 'black'
       })
     }
   },[location.pathname])
@@ -95,11 +98,11 @@ const Navbar = () => {
         state.token && state.user?.role === 'admin' &&
         <NavLink
           style={{ textShadow: '1px 1px 6px black' }}
-          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/new-post' ? 'text-primary' : ''}`}
-          to="/new-post"
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/Create' ? 'text-primary' : ''}`}
+          to="/create"
           onClick={() => setIsMenuOpen(false)}
         >
-          New Post
+          Create
         </NavLink>
       }
       <NavLink

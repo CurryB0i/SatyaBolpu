@@ -19,6 +19,7 @@ import Lenis from "@studio-freight/lenis";
 import { useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/all'
+import Create from './pages/Create'
 export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 gsap.registerPlugin(ScrollTrigger);
@@ -76,6 +77,7 @@ function App() {
         <Route path='/dashboard' element={<Dashboard />}/>
         <Route path='/explore' element={<Explore/>}/>
         <Route path='/explore/:culture' element={<Culture/>}/>
+        <Route path='/create' element={<Create />}/>
         <Route path='/new-post' element={<NewPost />}/>
         <Route path='/new-post/post-details' element={<PostDetails/>}/>
         <Route path='/new-post/editor' element={<Editor/>}/>
