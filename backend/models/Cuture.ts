@@ -2,8 +2,10 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ICulture extends Document {
   name: string;
-  descr: string;
-  image: string;
+  descriptiveName: string;
+  description: string;
+  coverImages: string[];
+  galleryImages: string[];
   posts: number;
 }
 
@@ -12,13 +14,21 @@ const cultureSchema = new Schema<ICulture>({
     type: String,
     required: true,
   },
-  descr: {
+  descriptiveName: {
     type: String,
     required: true,
   },
-  image: {
+  description: {
     type: String,
     required: true,
+  },
+  coverImages: {
+    type: [String],
+    required: true
+  },
+  galleryImages: {
+    type: [String],
+    required: true
   },
   posts: {
     type: Number,
