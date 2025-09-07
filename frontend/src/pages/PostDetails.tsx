@@ -8,7 +8,7 @@ import Button from "../components/Button";
 import { toast } from "react-toastify";
 import { PostDetailsType, usePost } from "../context/PostContext";
 import { FaEdit } from "react-icons/fa";
-import { getFile, saveFile } from "../utils/FileStore";
+import { clearIDB, getFile, saveFile } from "../utils/FileStore";
 import useApi from "../hooks/useApi";
 import { useLoading } from "../context/LoadingContext";
 
@@ -73,7 +73,6 @@ const PostDetails = () => {
     
     const {image, ...postDetailsWithoutImage} = postState.details;
     (async () => {
-      console.log(postState.details)
       setFormData({...postDetailsWithoutImage, image: await getFile(Number(image))});
     })();
     setSubmitted(true);
@@ -242,7 +241,6 @@ const PostDetails = () => {
     if(hasErrors)
       return 
 
-
     const postFormData = new FormData();
     postFormData.append("mainTitle", formData.mainTitle);
     postFormData.append("shortTitle", formData.shortTitle);
@@ -250,35 +248,36 @@ const PostDetails = () => {
     postFormData.append("description", formData.description);
     postFormData.append("locationSpecific", formData.locationSpecific ? "true" : "false");
     formData.tags.forEach(tag => postFormData.append("tags", tag));
-    if (formData.image && formData.image instanceof File) postFormData.append("file", formData.image);
+    if (formData.image instanceof File) postFormData.append("file", formData.image);
 
     const { image, ...formDataWithoutImage } = formData;
     if(image && image instanceof File) {
       const imageId = await saveFile(image);
       console.log(imageId)
       postDispatch({
-        type: 'SAVE_BASIC_DETAILS',
+        type: 'SAVE_POST_DETAILS',
         payload: {
-          details: { ...formDataWithoutImage, image: Number(imageId) } 
+          details: { ...formDataWithoutImage, image: imageId } 
         }
-      })
+      });
     }
     setSubmitted(true);
   }
 
   const handleNext = () => {
     if(submitted) {
-      navigate('/new-post/editor')
+      navigate('/create/new-post/editor')
     } else {
       toast.error("You need to submit the form first!");
     }
   }
 
-  const handleEditAgain = () => {
+  const handleEditAgain = async () => {
     setSubmitted(false);
     postDispatch({
-      type: 'CLEAR_BASIC_DETAILS',
-    })
+      type: 'CLEAR_POST_DETAILS',
+    });
+    await clearIDB();
   }
 
   if(!authState.token || authState.user?.role !== 'admin') 
@@ -504,13 +503,12 @@ const PostDetails = () => {
               />
         }
 
-
       </form>
 
       <div className="flex w-screen items-center justify-between p-10">
         <div 
           className={` text-[1.75rem] hover:text-primary text-white cursor-pointer`}
-          onClick={() => navigate('/new-post')}>
+          onClick={() => navigate('/create/new-post')}>
             {`< Progress`}
         </div>
         <div 
@@ -521,10 +519,8 @@ const PostDetails = () => {
           </div>
       </div>
 
-
     </div>
   );
 };
 
 export default PostDetails;
-

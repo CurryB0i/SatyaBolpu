@@ -31,17 +31,19 @@ const initialPostState : PostState = {
 }
 
 type PostAction =
-  | { type: 'SAVE_BASIC_DETAILS' , payload: { details: PostDetailsType } }
-  | { type: 'CLEAR_BASIC_DETAILS' }
+  | { type: 'SAVE_POST_DETAILS' , payload: { details: PostDetailsType } }
+  | { type: 'CLEAR_POST_DETAILS' }
   | { type: 'SAVE_EDITOR_CONTENT', payload: { content: string } }
   | { type: 'CLEAR_EDITOR_CONTENT' }
   | { type: 'SAVE_MAP_DETAILS', payload: { mapDetails: MapDetailsType } }
   | { type: 'CLEAR_MAP_DETAILS' }
-  | { type: 'CLEAR_POST' }
+  | { type: 'CLEAR_POST' };
+
+export type PostDispatch = React.Dispatch<PostAction>;
 
 const PostReducer = (state: PostState, action: PostAction) : PostState => {
   switch(action.type) {
-    case 'SAVE_BASIC_DETAILS': {
+    case 'SAVE_POST_DETAILS': {
       localStorage.setItem('postDetails',JSON.stringify(action.payload.details));
       return {
         ...state,
@@ -49,16 +51,16 @@ const PostReducer = (state: PostState, action: PostAction) : PostState => {
       }
     }
 
-    case 'CLEAR_BASIC_DETAILS': {
+    case 'CLEAR_POST_DETAILS': {
       localStorage.removeItem('postDetails');
       return {
         ...state,
         details: null
-      }
+      };
     }
 
     case 'SAVE_EDITOR_CONTENT': {
-      localStorage.setItem('editorContent',action.payload.content); 
+      localStorage.setItem('postContent',action.payload.content); 
       return {
         ...state,
         content: action.payload.content
@@ -66,7 +68,7 @@ const PostReducer = (state: PostState, action: PostAction) : PostState => {
     }
 
     case 'CLEAR_EDITOR_CONTENT': {
-      localStorage.removeItem('editorContent');  
+      localStorage.removeItem('postContent');  
       return {
         ...state,
         content: ''
@@ -91,7 +93,7 @@ const PostReducer = (state: PostState, action: PostAction) : PostState => {
 
     case 'CLEAR_POST': {
       localStorage.removeItem('postDetails');
-      localStorage.removeItem('editorContent');  
+      localStorage.removeItem('postContent');  
       localStorage.removeItem('mapDetails');
       return {
         ...initialPostState
@@ -105,7 +107,7 @@ const PostReducer = (state: PostState, action: PostAction) : PostState => {
 
 type PostContextType = {
   state: PostState;
-  dispatch: React.Dispatch<PostAction>;
+  dispatch: PostDispatch;
 }
 
 const PostContext = createContext<PostContextType>({
@@ -125,7 +127,7 @@ export const PostProvider = ({ children } : { children: ReactNode }) => {
       return Object.keys(parsed).length > 0 ? parsed : null;
     })();
 
-    const content = localStorage.getItem('editorContent') || '';
+    const content = localStorage.getItem('postContent') || '';
 
     const mapDetails = (() => {
       const raw = localStorage.getItem('mapDetails');

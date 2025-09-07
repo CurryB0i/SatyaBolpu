@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { MdCancel } from "react-icons/md";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Button from "../components/Button";
 import { useLoading } from "../context/LoadingContext";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +11,7 @@ import { ScrollTrigger } from "gsap/all";
 gsap.registerPlugin(useGSAP); 
 gsap.registerPlugin(ScrollTrigger);
 
-export type CultureType = {
+type CultureType = {
   name: string;
   descr: string;
   image: string | File;

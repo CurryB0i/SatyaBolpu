@@ -1,15 +1,8 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { FaPencilAlt, FaStar, FaHandsHelping, FaHashtag } from "react-icons/fa";
+import { FaPencilAlt, FaStar, FaHandsHelping } from "react-icons/fa";
 import Button from "../components/Button";
-import { useEffect, useRef, useState } from "react";
-import useApi from "../hooks/useApi";
-import { toast } from "react-toastify";
-import { FaSquarePlus } from "react-icons/fa6";
-import { PiHandsPrayingBold } from "react-icons/pi";
-import { CultureType } from "./Explore";
-import Form, { FormField } from "../components/Form";
 
 const data = [
   { month: 'Jan 2025', posts: 4 },
@@ -20,139 +13,8 @@ const data = [
   { month: 'Jun 2025', posts: 20 },
 ];
 
-const initialCultureFormData = {
-  name: '',
-  descr: '',
-  image: ''
-}
-
 const Dashboard = () => {
   const { state } = useAuth();
-  const [showAddMenu, setShowAddMenu] = useState<boolean>(false);
-  const [tagFormData, setTagFormData] = useState<{ tag: string }>({ tag: '' });
-  const [tagError, setTagError] = useState<string>('');
-  const [cultureFormData, setCultureFormData] = useState<Omit<CultureType, "posts">>(initialCultureFormData);
-  const [cultureError, setCultureError] = useState<string>('');
-  const [activeForm, setActiveForm] = useState<'tag' | 'culture' | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
-  const tagsApi = useApi('/tags', { auto: false });
-  const uploadApi = useApi('/upload',{ auto: false });
-  const culturesApi = useApi('/cultures', { auto: false });
-  
-  const tagFormFields: FormField[] = [
-    {
-      name: 'tag',
-      label: 'Tag Name',
-      type: 'text',
-      placeholder: 'Enter tag name...',
-      required: true,
-      validation: (value) => {
-        if (!value || !value.trim()) {
-          return 'Tag name cannot be empty';
-        }
-        return null;
-      }
-    }
-  ];
-
-  const cultureFormFields: FormField[] = [
-    {
-      name: 'name',
-      label: 'Culture Name',
-      type: 'text',
-      placeholder: 'Enter culture name...',
-      required: true
-    },
-    {
-      name: 'descr',
-      label: 'Description',
-      type: 'textarea',
-      placeholder: 'Enter culture description...',
-      required: true,
-      rows: 4
-    },
-    {
-      name: 'image',
-      label: 'Image',
-      type: 'file',
-      accept: 'image/*',
-      required: true
-    }
-  ];
-  
-  useEffect(() => {
-    const handleClickOutside = (e: Event) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setShowAddMenu(false);
-      }
-    }
-
-    window.addEventListener("click", handleClickOutside)
-    return () => window.removeEventListener("click", handleClickOutside)
-  }, [])
-
-  const handleAddTag = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setTagError('');
-    await tagsApi.post({ tag: tagFormData.tag.trim() });
-  };
-
-  const handleAddCulture = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    setCultureError('');
-    const formData = new FormData();
-    formData.append('file',cultureFormData.image);
-    const res = await uploadApi.post(formData);
-    await culturesApi.post({...cultureFormData, image: res.path});
-  };
-
-  const handleTagFormChange = (name: string, value: any) => {
-    setTagFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleCultureFormChange = (name: string, value: any) => {
-    setCultureFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const closeForm = () => {
-    setActiveForm(null);
-    setTagFormData({ tag: '' });
-    setTagError('');
-    setCultureFormData(initialCultureFormData);
-    setCultureError('');
-  };
-
-  useEffect(() => {
-    if (tagsApi.error) {
-      setTagError(tagsApi.error);
-    }
-
-    if (tagsApi.data && tagFormData.tag) {
-      toast.success(`'${tagFormData.tag}' tag successfully added`);
-      setTagFormData({ tag: '' });
-      setActiveForm(null);
-    }
-  }, [tagsApi.data, tagsApi.error])
-
-  useEffect(() => {
-    if (culturesApi.error) {
-      setCultureError(culturesApi.error);
-    }
-
-    if (culturesApi.data && cultureFormData.name) {
-      toast.success(`'${cultureFormData.name}' culture successfully added`);
-      setCultureFormData(initialCultureFormData);
-      setActiveForm(null);
-    }
-  }, [culturesApi.data, culturesApi.error])
 
   if (!state.token) return <Navigate to='/login' replace />
   

@@ -19,7 +19,8 @@ import { toast } from 'react-toastify';
 import { useDialog } from '../context/DialogBoxContext';
 import Title from '../components/Title';
 import { usePost } from '../context/PostContext';
-import { getFile, saveFile } from '../utils/FileStore';
+import { clearIDB, getFile, saveFile } from '../utils/FileStore';
+import { useCulture } from '../context/CultureContext';
 
 type clickedType = {
   bold: boolean;
@@ -27,32 +28,52 @@ type clickedType = {
   underline: boolean;
 };
 
-const TiptapEditor = () => {
+export enum Mode {
+  POST,
+  CULTURE
+};
+
+const Editor = ({ mode } : { mode: Mode }) => {
+  const { state: authState } = useAuth();
+  const navigate = useNavigate();
+  const dialog = useDialog();
+  const { state: postState, dispatch: postDispatch } = usePost();
+  const { state: cultureState, dispatch: cultureDispatch } = useCulture();
+
   const [clicked, setClicked] = useState<clickedType>({
     bold: false,
     italic: false,
     underline: false,
   });
-  const { state: authState } = useAuth();
-  const { state: postState, dispatch: postDispatch } = usePost();
   const [editorState, setEditorState] = useState<'editing' | 'preview' | 'submitted'>('editing');
-  const [title, setTitle] = useState<string>(postState.details?.mainTitle || 'Title');
-  const titleRef = useRef<HTMLTextAreaElement | null>(null);
-  const [fontSize,setFontSize] = useState<string>('normal');
-  const fileRef = useRef<HTMLInputElement | null>(null);
+  const [title, setTitle] = useState<string>(() => {
+    if(mode === Mode.POST) {
+      return postState.details?.mainTitle || 'Title';
+    } else {
+      return cultureState.details?.name || 'Title';
+    }
+  });
   const [body,setBody] = useState<string>('');
+  const [fontSize,setFontSize] = useState<string>('normal');
   const [showAttachmentMenu,setShowAttachmentMenu] = useState<boolean>(false);
-  const attachmentRef = useRef<HTMLDivElement | null>(null);
   const [askEmbedUrl,setAskEmbedUrl] = useState<boolean>(false);
   const [embedUrl,setEmbedUrl] = useState<string>('');
+
+  const titleRef = useRef<HTMLTextAreaElement | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const attachmentRef = useRef<HTMLDivElement | null>(null);
   const objectUrls = useRef<string[]>([]);
-  const navigate = useNavigate();
-  const dialog = useDialog();
 
   useLayoutEffect(() => {
-    if(postState.content) {
+    if(mode === Mode.POST && postState.content) {
       (async () => {
         const indexedContent = await getIndexedFiles(postState.content!);
+        setBody(indexedContent);
+      })()
+      setEditorState('submitted');
+    } else if(mode === Mode.CULTURE && cultureState.content) {
+      (async () => {
+        const indexedContent = await getIndexedFiles(cultureState.content!);
         setBody(indexedContent);
       })()
       setEditorState('submitted');
@@ -119,7 +140,13 @@ const TiptapEditor = () => {
     ],
     content: '',
     onCreate: async ({ editor }) => {
-      const raw = localStorage.getItem('editorContentDraft') || postState.content || '';
+      const raw = (() => {
+        if(mode === Mode.POST) {
+          return localStorage.getItem('postContentDraft') || postState.content || '';
+        } else {
+          return localStorage.getItem('cultureContentDraft') || cultureState.content || '';
+        }
+      })();
       const hydrated = await getIndexedFiles(raw);
       editor.commands.setContent(hydrated);
     },
@@ -144,69 +171,69 @@ const TiptapEditor = () => {
   }, [title,editorState]);
 
   const handleFontSize = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      if(editor) {
-          setFontSize(e.target.value);
-          editor.chain().focus().setFontSize(e.target.value).run();
-      }
+    if(editor) {
+      setFontSize(e.target.value);
+      editor.chain().focus().setFontSize(e.target.value).run();
+    }
   }
 
   const handleClick = useCallback((button: keyof clickedType) => {
-      const chain = editor?.chain().focus();
-      if (!chain) {
-          setClicked({ bold: false, italic: false, underline: false });
-          return;
+    const chain = editor?.chain().focus();
+    if (!chain) {
+      setClicked({ bold: false, italic: false, underline: false });
+      return;
+    }
+
+    setClicked(prev => {
+      const newState = {
+        ...prev,
+        [button]: !prev[button],
+      };
+
+      if (newState[button]) {
+        chain.setMark(button).run();
+      } else {
+        chain.unsetMark(button).run();
       }
 
-      setClicked(prev => {
-          const newState = {
-              ...prev,
-              [button]: !prev[button],
-          };
-
-          if (newState[button]) {
-              chain.setMark(button).run();
-          } else {
-              chain.unsetMark(button).run();
-          }
-
-          return newState;
-      });
+      return newState;
+    });
   },[editor]);
 
   const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if(file) {
-        const id = await saveFile(file)
-        const type = file.type.split('/')[0];
-        const url = URL.createObjectURL(file);
-        objectUrls.current.push(url);
-        if(type === 'image') {
-            editor?.commands.insertContent({ 
-              type: "image",
-              attrs: {
-                idbKey: id,
-                src: url
-              }
-            })      
-        } else if(type === 'video') {
-            editor?.commands.insertContent({
-                type: "video",
-                attrs : {
-                    idbKey: id,
-                    src: url,
-                    controls: true
-                }
-            })
-        } else if(type == 'audio') {
-            editor?.commands.insertContent({
-                type: "audio",
-                attrs : {
-                    idbKey: id,
-                    src: url,
-                    controls: true
-                }
-            })
-        }
+      const id = await saveFile(file)
+      const type = file.type.split('/')[0];
+      const url = URL.createObjectURL(file);
+      objectUrls.current.push(url);
+      if(type === 'image') {
+        editor?.commands.insertContent({ 
+          type: "image",
+          attrs: {
+            idbKey: id,
+            src: url
+          }
+        })      
+      } else if(type === 'video') {
+        editor?.commands.insertContent({
+          type: "video",
+          attrs : {
+            idbKey: id,
+            src: url,
+            controls: true
+          }
+        })
+      } else if(type == 'audio') {
+        editor?.commands.insertContent({
+          type: "audio",
+          attrs : {
+            idbKey: id,
+            src: url,
+            controls: true
+          }
+        })
+      }
     }
   }
 
@@ -218,49 +245,62 @@ const TiptapEditor = () => {
 
   const handleEmbedUrl = () => {
     if(embedUrl) {
-        setAskEmbedUrl(false)
-        editor.commands.insertContent({
-            type: "iframeEmbed",
-            attrs: {
-                html: embedUrl
-            }
-        })
+      setAskEmbedUrl(false)
+      editor.commands.insertContent({
+        type: "iframeEmbed",
+        attrs: {
+          html: embedUrl
+        }
+      })
     }
   }
 
   const formatHtml = (html: string) => {
-      return html
-      .replace(/<p>(.*?)<\/p>/gi, (_, content) => content.trim() === '' ? '<br>' : `${content}<br>`)
-      .replace(/(<br>\s*)+$/g, '');
+    return html
+    .replace(/<p>(.*?)<\/p>/gi, (_, content) => content.trim() === '' ? '<br>' : `${content}<br>`)
+    .replace(/(<br>\s*)+$/g, '');
   };
 
   const decodeHtml = (html: string) => {
-      const txt = document.createElement('textarea')
-      txt.innerHTML = html
-      return txt.value
+    const txt = document.createElement('textarea')
+    txt.innerHTML = html
+    return txt.value
   }
 
   const handleSave = useCallback(() => {
-      if(editor) {
-          toast.info("Draft saved to local storage");
-          if(postState.details && title !== postState.details.mainTitle) {
-            postDispatch({
-              type: 'SAVE_BASIC_DETAILS',
-              payload: {
-                details: {...postState.details, mainTitle: title}
-              }
-            }) 
-          }
-          
-          localStorage.setItem('editorContentDraft',editor.getHTML());
+    if(editor) {
+      toast.info("Draft saved to local storage");
+      if(mode === Mode.POST) {
+        if(postState.details && title !== postState.details.mainTitle) {
+          postDispatch({
+            type: 'SAVE_POST_DETAILS',
+            payload: {
+              details: {...postState.details, mainTitle: title}
+            }
+          }) 
+        }
+
+        localStorage.setItem('postContentDraft',editor.getHTML());
+      } else {
+        if(cultureState.details && title !== cultureState.details.name) {
+          cultureDispatch({
+            type: 'SAVE_CULTURE_DETAILS',
+            payload: {
+              details: {...cultureState.details, name: title}
+            }
+          }) 
+        }
+
+        localStorage.setItem('cultureContentDraft',editor.getHTML());
       }
+    }
   }, [editor, title]);
 
   const handlePreview = useCallback(() => {
-      if(editor) {
-          setEditorState((prev) => prev === 'editing' ? 'preview' : 'editing');
-          setBody(formatHtml(editor.getHTML()));
-      }
+    if(editor) {
+      setEditorState((prev) => prev === 'editing' ? 'preview' : 'editing');
+      setBody(formatHtml(editor.getHTML()));
+    }
   }, [editor]);
 
   const handleSubmit = useCallback(() => {
@@ -271,102 +311,124 @@ const TiptapEditor = () => {
       return;
     }
 
-      const submit = () => {
-          if(editor) {
-              handlePreview();
-              setEditorState('submitted');
-              postDispatch({
-                type: 'SAVE_EDITOR_CONTENT',
-                payload: {
-                  content: content
-                }
-              })
-              localStorage.removeItem('editorContentDraft');
-              toast.success("Editor content Submitted.");
-              if(!postState.details?.locationSpecific) {
-                navigate('/new-post');
-              }
-          }
-      }
+    const submit = () => {
+      if(editor) {
+        handlePreview();
+        setEditorState('submitted');
 
-      dialog?.popup({
-          title: 'Draft Submit',
-          descr: "Are you sure you want to submit the document?",
-          severity: 'default',
-          onConfirm: submit
-      });
-      
+        if(mode === Mode.POST) {
+          postDispatch({
+            type: 'SAVE_EDITOR_CONTENT',
+            payload: {
+              content: content
+            }
+          });
+          localStorage.removeItem('postContentDraft');
+          toast.success("Editor content Submitted.");
+          navigate('/create/new-post');
+        } else {
+          cultureDispatch({
+            type: 'SAVE_EDITOR_CONTENT',
+            payload: {
+              content: content
+            }
+          });
+          localStorage.removeItem('cultureContentDraft');
+          toast.success("Editor content Submitted.");
+          navigate('/create/new-culture');
+        }
+      }
+    }
+
+    dialog?.popup({
+      title: 'Draft Submit',
+      descr: "Are you sure you want to submit the document?",
+      severity: 'default',
+      onConfirm: submit
+    });
+
   }, [editor, dialog]);
 
   useEffect(() => {
-      const handleKeyPress = (e: KeyboardEvent) => {
-          if ((e.ctrlKey || e.metaKey) && !e.shiftKey && editorState !== 'submitted') {
-              const key = e.key.toLowerCase();
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && editorState !== 'submitted') {
+        const key = e.key.toLowerCase();
 
-              if (['b', 'i', 'u'].includes(key)) {
-                  e.preventDefault();
-                  editor.chain().focus();
-                  const keyToButton: Record<string, keyof clickedType> = {
-                      b: "bold",
-                      i: "italic",
-                      u: "underline",
-                  };
-                  const button = keyToButton[key] || "underline";
-                  handleClick(button)
-                  return
-              }
+        if (['b', 'i', 'u'].includes(key)) {
+          e.preventDefault();
+          editor.chain().focus();
+          const keyToButton: Record<string, keyof clickedType> = {
+            b: "bold",
+            i: "italic",
+            u: "underline",
+          };
+          const button = keyToButton[key] || "underline";
+          handleClick(button)
+          return
+        }
 
-              editor.chain().blur()
-              if(key === 'p') {
-                  e.preventDefault()
-                  handlePreview()
-              } else if(key === 's') {
-                  e.preventDefault();
-                  handleSave();
-              } else if(key === 'enter') {
-                  e.preventDefault()
-                  handleSubmit();
-              }
-          }
-      };
+        editor.chain().blur()
+        if(key === 'p') {
+          e.preventDefault()
+          handlePreview()
+        } else if(key === 's') {
+          e.preventDefault();
+          handleSave();
+        } else if(key === 'enter') {
+          e.preventDefault()
+          handleSubmit();
+        }
+      }
+    };
 
-      window.addEventListener('keydown', handleKeyPress);
-      return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
   }, [editor, handleSave, handleSubmit, handlePreview, handleClick, editorState]);
 
   useEffect(() => {
-      const videos = document.querySelectorAll('video');
-      videos.forEach((vid) => {
-          vid.pause();
-          vid.currentTime = 0;
-      });
+    const videos = document.querySelectorAll('video');
+    videos.forEach((vid) => {
+      vid.pause();
+      vid.currentTime = 0;
+    });
 
-      const audios = document.querySelectorAll('audio');
-      audios.forEach((aud) => {
-          aud.pause();
-          aud.currentTime = 0;
-      });
+    const audios = document.querySelectorAll('audio');
+    audios.forEach((aud) => {
+      aud.pause();
+      aud.currentTime = 0;
+    });
 
-      const iframes = document.querySelectorAll('iframe');
-      iframes.forEach((iframe) => {
-          const src = iframe.src;
-          iframe.src = '';
-          iframe.src = src;
-      });
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach((iframe) => {
+      const src = iframe.src;
+      iframe.src = '';
+      iframe.src = src;
+    });
   }, [editorState]);
 
-  const handleEditAgain = () => {
-    postDispatch({
-      type: 'CLEAR_EDITOR_CONTENT'
-    });
+  const handleEditAgain = async () => {
+    if(mode === Mode.POST) {
+      postDispatch({
+        type: 'CLEAR_EDITOR_CONTENT'
+      });
+    } else {
+      cultureDispatch({
+        type: 'CLEAR_EDITOR_CONTENT'
+      });
+    }
+    await clearIDB();
     setEditorState('editing');
   }
 
   if(!authState.token || authState.user?.role !== "admin") 
     return <Navigate to={'/404'} replace/>
 
-  if(!postState.details) {
-    return <Navigate to={'/new-post/basic-details'} replace/>
+  if(mode === Mode.POST && !postState.details) {
+    return <Navigate to={'/create/new-post/post-details'} replace/>
+  }
+
+  if(mode === Mode.CULTURE && !cultureState.details) {
+    return <Navigate to={'/create/new-culture/culture-details'} replace/>
   }
 
   return (
@@ -576,14 +638,24 @@ const TiptapEditor = () => {
         <div className="w-full flex items-center justify-between p-10">
           <div 
             className="text-white text-[1.75rem] cursor-pointer hover:text-primary"
-            onClick={() => navigate('/new-post/post-details')}>
-            {`< Basic Details`}
+            onClick={() => 
+                mode === Mode.POST ? 
+                  navigate('/create/new-post/post-details') : 
+                  navigate('/create/new-culture/culture-details')
+            }
+          >
+            {
+              mode === Mode.POST ?
+              `< Post Details` :
+              `< Culture Details`
+            }
           </div>
+
           {
-            postState.details.locationSpecific &&
+            mode === Mode.POST && postState.details?.locationSpecific &&
               <div 
                 className="text-white text-[1.75rem] cursor-pointer hover:text-primary"
-                onClick={() => navigate('/new-post/map')}>
+                onClick={() => navigate('/create/new-post/map')}>
                 {`Map >`}
               </div>
           }
@@ -593,4 +665,4 @@ const TiptapEditor = () => {
   );
 };
 
-export default TiptapEditor;
+export default Editor;

@@ -3,7 +3,7 @@ import NotFound from './components/NotFound'
 import Home from './pages/Home'
 import Explore from './pages/Explore'
 import MAP from './pages/MAP'
-import Editor from './pages/Editor'
+import Editor, { Mode } from './pages/Editor'
 import Categories from './pages/Categories'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
@@ -20,6 +20,8 @@ import { useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/all'
 import Create from './pages/Create'
+import NewCulture from './pages/NewCulture'
+import CultureDetails from './pages/CultureDetails'
 export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 gsap.registerPlugin(ScrollTrigger);
@@ -78,10 +80,13 @@ function App() {
         <Route path='/explore' element={<Explore/>}/>
         <Route path='/explore/:culture' element={<Culture/>}/>
         <Route path='/create' element={<Create />}/>
-        <Route path='/new-post' element={<NewPost />}/>
-        <Route path='/new-post/post-details' element={<PostDetails/>}/>
-        <Route path='/new-post/editor' element={<Editor/>}/>
-        <Route path='/new-post/map' element={<MAP editMode/>}/>
+        <Route path='/create/new-post' element={<NewPost />}/>
+        <Route path='/create/new-post/post-details' element={<PostDetails/>}/>
+        <Route path='/create/new-post/editor' element={<Editor mode={Mode.POST} />}/>
+        <Route path='/create/new-post/map' element={<MAP editMode/>}/>
+        <Route path='/create/new-culture' element={<NewCulture />}/>
+        <Route path='/create/new-culture/culture-details' element={<CultureDetails />}/>
+        <Route path='/create/new-culture/editor' element={<Editor mode={Mode.CULTURE} />}/>
         <Route path='/updates' element={<Updates />}/>
         <Route path='/:title/categories' element={<Categories/>}/>
         <Route path='/map' element={<MAP/>}/>

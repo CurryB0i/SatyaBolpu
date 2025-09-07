@@ -9,20 +9,23 @@ import Footer from './components/Footer.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 import { DialogBoxProvider } from './context/DialogBoxContext.tsx'
 import { PostProvider } from './context/PostContext.tsx'
+import { CultureProvider } from './context/CultureContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
    <BrowserRouter>
     <AuthProvider>
-     <PostProvider>
-      <DialogBoxProvider>
-       <Navbar />
+     <CultureProvider>
+      <PostProvider>
+       <DialogBoxProvider>
+        <Navbar />
         <LoadingProvider>
          <App />
         </LoadingProvider>
-       <Footer />
-      </DialogBoxProvider>
-     </PostProvider>
+        <Footer />
+       </DialogBoxProvider>
+      </PostProvider>
+     </CultureProvider>
     </AuthProvider>
    </BrowserRouter>
   </StrictMode>

@@ -417,11 +417,11 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
       }
     });
     toast.success("Map Details stored successfully.");
-    setTimeout(() => navigate('/new-post'),3000)
+    setTimeout(() => navigate('/create/new-post'),3000)
   }
 
   if(editMode && (!state.content || !state.details?.locationSpecific)) {
-    return <Navigate to={'/new-post/editor'} replace/>
+    return <Navigate to={'/create/new-post/editor'} replace/>
   }
 
   return (
@@ -574,7 +574,7 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
             <div 
               className="absolute text-[1.75rem] text-white z-[400] bottom-0 m-5
                cursor-pointer hover:text-primary"
-              onClick={() => navigate('/new-post/editor')}>
+              onClick={() => navigate('/create/new-post/editor')}>
               {`< Editor`}
             </div>
         }
