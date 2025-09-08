@@ -1,9 +1,9 @@
 import express from 'express';
 import { uploadPost } from '../controllers/PostController.js';
-import { authMiddleware } from '../middleware/authMiddleware.js';
+import { adminMiddleware } from '../middleware/AdminMiddleware.js';
 
 const router = express.Router();
 
-router.post('/',authMiddleware,uploadPost);
+router.post('/',adminMiddleware,uploadPost);
 
 export default router;

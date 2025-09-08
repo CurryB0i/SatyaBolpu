@@ -1,11 +1,11 @@
 import express from 'express';
-import { getCulture, getCultures, uploadCulture } from '../controllers/cultureController.js';
-import { authMiddleware } from '../middleware/authMiddleware.js';
+import { getCulture, getCultures, uploadCulture } from '../controllers/CultureController.js';
+import { adminMiddleware } from '../middleware/AdminMiddleware.js';
 
 const router = express.Router();
 
 router.get('/',getCultures);
 router.get('/:name',getCulture);
-router.post('/',authMiddleware,uploadCulture);
+router.post('/',adminMiddleware,uploadCulture);
 
 export default router;

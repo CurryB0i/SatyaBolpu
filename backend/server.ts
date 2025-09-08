@@ -1,9 +1,9 @@
 import express from 'express';
-import authRoutes from './routes/authRoutes.js';
-import uploadRoutes from './routes/uploadRoutes.js';
-import postRoutes from './routes/postRoutes.js';
-import tagRoutes from './routes/tagRoutes.js';
-import cultureRoutes from './routes/cultureRoutes.js';
+import authRoutes from './routes/AuthRoutes.js';
+import uploadRoutes from './routes/UploadRoutes.js';
+import postRoutes from './routes/PostRoutes.js';
+import tagRoutes from './routes/TagRoutes.js';
+import cultureRoutes from './routes/CultureRoutes.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './utils/db.js';
@@ -31,7 +31,7 @@ app.get('/api', (req, res) => res.send('Hello World!'));
 app.use('/api/auth',authRoutes);
 app.use('/api/upload',uploadRoutes);
 app.use('/api/posts',postRoutes);
-app.use('/api/tags',tagRoutes);
 app.use('/api/cultures',cultureRoutes);
+app.use('/api/tags',tagRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
