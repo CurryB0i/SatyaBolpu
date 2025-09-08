@@ -70,13 +70,30 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { data, error, post } = useApi('/auth/refresh', { auto: false });
-  const [state, dispatch] = useReducer(authReducer, initialState, () => {
+   const [state, dispatch] = useReducer(authReducer, initialState, () => {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
+    
+    if (token) {
+      try {
+        const { exp } = jwtDecode<{ exp: number }>(token);
+        const currentTime = Date.now() / 1000;
+        
+        if (exp <= currentTime) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          return initialState;
+        }
+      } catch (err) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return initialState;
+      }
+    }
+    
     return { user, token, isRefreshing: false };
-  });
-  
-  const refreshTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  }); 
+  const refreshTimeoutRef = useRef<number | null>(null);
   const isRefreshingRef = useRef(false);
 
   const refreshToken = useCallback(async () => {
@@ -95,7 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       isRefreshingRef.current = false;
     }
-  }, [post, state.isRefreshing]);
+  }, [post]);
 
   const scheduleTokenRefresh = useCallback((token: string) => {
     try {

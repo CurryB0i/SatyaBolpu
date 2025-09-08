@@ -22,6 +22,7 @@ import { ScrollTrigger } from 'gsap/all'
 import Create from './pages/Create'
 import NewCulture from './pages/NewCulture'
 import CultureDetails from './pages/CultureDetails'
+import NewTag from './pages/NewTag'
 export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 gsap.registerPlugin(ScrollTrigger);
@@ -87,6 +88,7 @@ function App() {
         <Route path='/create/new-culture' element={<NewCulture />}/>
         <Route path='/create/new-culture/culture-details' element={<CultureDetails />}/>
         <Route path='/create/new-culture/editor' element={<Editor mode={Mode.CULTURE} />}/>
+        <Route path='/create/new-tag' element={<NewTag />}/>
         <Route path='/updates' element={<Updates />}/>
         <Route path='/:title/categories' element={<Categories/>}/>
         <Route path='/map' element={<MAP/>}/>

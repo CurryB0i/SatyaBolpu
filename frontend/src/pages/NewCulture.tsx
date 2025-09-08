@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDialog } from "../context/DialogBoxContext";
 import useApi from "../hooks/useApi";
-import { clearIDB, getFile } from "../utils/FileStore";
+import { clearEntityStore, getFile } from "../utils/FileStore";
 import ProgressBar from "../components/ProgressBar";
 import { CultureState, useCulture } from "../context/CultureContext";
 import { toast } from "react-toastify";
@@ -33,7 +33,7 @@ const NewCulture = () => {
         if (cultureState.details.coverImages.length > 0) {
           const files = await Promise.all(
             cultureState.details.coverImages.map(async (coverImage) => {
-              return await getFile(Number(coverImage));
+              return await getFile({ entity: "culture", type: "details" },Number(coverImage));
             })
           );
           const validFiles = files.filter((f): f is File => f !== null);
@@ -53,7 +53,7 @@ const NewCulture = () => {
         if (cultureState.details.galleryImages.length > 0) {
           const files = await Promise.all(
             cultureState.details.galleryImages.map(async (galleryImage) => {
-              return await getFile(Number(galleryImage));
+              return await getFile({ entity: "culture", type: "details" },Number(galleryImage));
             })
           );
           const validFiles = files.filter((f): f is File => f !== null);
@@ -82,7 +82,7 @@ const NewCulture = () => {
             if (fileEl) {
               const idbKey = fileEl.getAttribute("data-idbkey");
               if (!idbKey) continue;
-              const file = await getFile(Number(idbKey));
+              const file = await getFile({ entity: "culture", type: "editor" },Number(idbKey));
               if (!file) continue;
               const formData = new FormData();
               formData.append("file", file);
@@ -112,7 +112,7 @@ const NewCulture = () => {
        cultureDispatch({
          type: 'CLEAR_CULTURE'
        });
-       (async () => await clearIDB())();
+       (async () => await clearEntityStore({ entity: "culture" }))();
     }
     if(culturesApi.error) console.log(culturesApi.error)
   },[culturesApi.data, culturesApi.error])
@@ -121,7 +121,7 @@ const NewCulture = () => {
     cultureDispatch({
       type: 'CLEAR_CULTURE'
     });
-    await clearIDB();
+    await clearEntityStore({ entity: "culture" });
   }
   
   if(!authState.token || authState.user?.role !== 'admin')

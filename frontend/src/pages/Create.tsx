@@ -1,5 +1,4 @@
 import { PiHandsPrayingBold } from "react-icons/pi";
-import Title from "../components/Title";
 import { MdArticle } from "react-icons/md";
 import { FaHashtag } from "react-icons/fa6";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -13,9 +12,9 @@ const Create = () => {
     return <Navigate to={'/404'} replace/>
 
   return (
-    <div className="w-full">
-      <div className="my-20">
-        <Title title="Create"/>
+    <div className="w-full flex flex-col items-center justify-center">
+      <div className="w-full mt-20 text-[5rem] text-primary text-center font-black">
+        Create
       </div>
 
       <div className="w-full flex flex-col items-center justify-center gap-5 text-black my-20">

@@ -6,7 +6,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDialog } from "../context/DialogBoxContext";
 import useApi from "../hooks/useApi";
-import { clearIDB, getFile } from "../utils/FileStore";
+import { clearEntityStore, getFile } from "../utils/FileStore";
 import ProgressBar from "../components/ProgressBar";
 import { toast } from "react-toastify";
 
@@ -30,7 +30,7 @@ const NewPost = () => {
       let uploadData: PostState = postState;
 
       if (postState.details?.image) {
-        const file = await getFile(Number(postState.details.image));
+        const file = await getFile({ entity: "post", type: "details" },Number(postState.details.image));
         if (file) {
           const formData = new FormData();
           formData.append("file", file);
@@ -53,7 +53,7 @@ const NewPost = () => {
           if (fileEl) {
             const idbKey = fileEl.getAttribute("data-idbkey");
             if (!idbKey) continue;
-            const file = await getFile(Number(idbKey));
+            const file = await getFile({ entity: "post", type: "editor" },Number(idbKey));
             if (!file) continue;
             const formData = new FormData();
             formData.append("file", file);
@@ -82,7 +82,7 @@ const NewPost = () => {
        postDispatch({
          type: 'CLEAR_POST'
        });
-       (async () => await clearIDB())();
+       (async () => await clearEntityStore({ entity: "post" }))();
     }
     if(postsApi.error) console.log(postsApi.error)
   },[postsApi.data, postsApi.error])
@@ -91,7 +91,7 @@ const NewPost = () => {
     postDispatch({
       type: 'CLEAR_POST'
     });
-    await clearIDB();
+    await clearEntityStore({ entity: "post" });
   }
   
   if(!authState.token || authState.user?.role !== 'admin')

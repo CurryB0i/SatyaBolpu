@@ -19,7 +19,7 @@ import { toast } from 'react-toastify';
 import { useDialog } from '../context/DialogBoxContext';
 import Title from '../components/Title';
 import { usePost } from '../context/PostContext';
-import { clearIDB, getFile, saveFile } from '../utils/FileStore';
+import { clearStore, getFile, saveFile } from '../utils/FileStore';
 import { useCulture } from '../context/CultureContext';
 
 type clickedType = {
@@ -110,7 +110,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
           const fileId = idAttr ? Number(idAttr) : NaN;
 
           if (!isNaN(fileId)) {
-            const file = await getFile(fileId);
+            const file = await getFile({ entity: mode === Mode.POST ? "post" : "culture", type: "editor" }, fileId);
             if (file) {
               const blobURL = URL.createObjectURL(file);
               fileEl.setAttribute('src', blobURL);
@@ -203,7 +203,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
   const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if(file) {
-      const id = await saveFile(file)
+      const id = await saveFile({ entity: mode === Mode.POST ? 'post' : 'culture', type: 'editor' },file);
       const type = file.type.split('/')[0];
       const url = URL.createObjectURL(file);
       objectUrls.current.push(url);
@@ -416,7 +416,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
         type: 'CLEAR_EDITOR_CONTENT'
       });
     }
-    await clearIDB();
+    await clearStore({ entity: "culture", type: "editor" });
     setEditorState('editing');
   }
 

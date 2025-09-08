@@ -33,7 +33,7 @@ const Navbar = () => {
 
   useEffect(() => {
     if (isMenuOpen) {
-      document.body.style.overflowY = 'hidden';
+      document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflowY = 'auto';
     }
@@ -174,9 +174,9 @@ const Navbar = () => {
       </nav>
 
       <div
-        className={`links lg:hidden text-xl font-semibold text-white text-center bg-black h-0 w-screen
+        className={`links lg:hidden text-xl font-semibold text-white text-center bg-black w-screen
             overflow-hidden flex flex-col items-center justify-center gap-3 absolute right-0 z-[9999]
-            transition-all duration-500 ${isMenuOpen ? 'h-screen' : ''}`}
+            transition-all duration-500 ${isMenuOpen ? 'h-screen' : 'h-0'}`}
         ref={menuRef}
       >
         <NavLinks />

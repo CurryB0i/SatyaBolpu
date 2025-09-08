@@ -54,13 +54,13 @@ const CultureDetails = () => {
       if(coverImages && galleryImages) {
         const coverImagesFileObjs = (
           await Promise.all(
-            coverImages.map((coverImage) => getFile(Number(coverImage)))
+            coverImages.map((coverImage) => getFile({ entity: "culture", type: "details" },Number(coverImage)))
           )
         ).filter((file): file is File => file !== null);
 
       const galleryImagesFileObjs = (
         await Promise.all(
-          galleryImages.map((galleryImage) => getFile(Number(galleryImage)))
+          galleryImages.map((galleryImage) => getFile({ entity: "culture", type: "details" },Number(galleryImage)))
         )
       ).filter((file): file is File => file !== null);
 
@@ -198,7 +198,7 @@ const CultureDetails = () => {
     await Promise.all(
       formData.coverImages.map(async (coverImage) => {
         if (coverImage instanceof File) {
-          return await saveFile(coverImage);
+          return await saveFile({ entity: "culture", type: "details" },coverImage);
         }
         return null;
       })
@@ -209,7 +209,7 @@ const CultureDetails = () => {
       await Promise.all(
         formData.galleryImages.map(async (galleryImage) => {
           if (galleryImage instanceof File) {
-            return await saveFile(galleryImage);
+            return await saveFile({ entity: "culture", type: "details" },galleryImage);
           }
           return null;
         })

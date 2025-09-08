@@ -8,7 +8,7 @@ import Button from "../components/Button";
 import { toast } from "react-toastify";
 import { PostDetailsType, usePost } from "../context/PostContext";
 import { FaEdit } from "react-icons/fa";
-import { clearIDB, getFile, saveFile } from "../utils/FileStore";
+import { clearStore, getFile, saveFile } from "../utils/FileStore";
 import useApi from "../hooks/useApi";
 import { useLoading } from "../context/LoadingContext";
 
@@ -73,7 +73,7 @@ const PostDetails = () => {
     
     const {image, ...postDetailsWithoutImage} = postState.details;
     (async () => {
-      setFormData({...postDetailsWithoutImage, image: await getFile(Number(image))});
+      setFormData({...postDetailsWithoutImage, image: await getFile({ entity: "post", type: "details" }, Number(image))});
     })();
     setSubmitted(true);
   },[])
@@ -127,6 +127,10 @@ const PostDetails = () => {
         }));
         tagRef.current.value = '';
         setActiveTag('');
+        const index = allowedTags.indexOf(tag);
+        setAllowedTags(prev => prev.filter((_, i) => i !== index));
+        setActiveIndex(0);
+        setVisibleStart(0);
       }
     }
   }
@@ -161,9 +165,6 @@ const PostDetails = () => {
     if (e.key === "Enter" && allowedTags[activeIndex]) {
       e.preventDefault();
       handleAddTag(allowedTags[activeIndex]);
-      setAllowedTags(prev => prev.filter((_, i) => i !== activeIndex));
-      setActiveIndex(0);
-      setVisibleStart(0);
     }
 
     setErrors(prev => ({
@@ -252,7 +253,7 @@ const PostDetails = () => {
 
     const { image, ...formDataWithoutImage } = formData;
     if(image && image instanceof File) {
-      const imageId = await saveFile(image);
+      const imageId = await saveFile({ entity: 'post', type: 'details' }, image);
       console.log(imageId)
       postDispatch({
         type: 'SAVE_POST_DETAILS',
@@ -277,7 +278,7 @@ const PostDetails = () => {
     postDispatch({
       type: 'CLEAR_POST_DETAILS',
     });
-    await clearIDB();
+    await clearStore({ entity: "post", type: "details" });
   }
 
   if(!authState.token || authState.user?.role !== 'admin') 
@@ -491,7 +492,7 @@ const PostDetails = () => {
 
           submitted ? 
             <FaEdit
-              className={`text-[2.5rem] cursor-pointer m-5 bg-black 
+              className={`text-[2.5rem] cursor-pointer m-5 bg-black mx-auto 
                          text-white hover:scale-110 hover:text-primary z-50`}
               id='edit'
               onClick={handleEditAgain}/>
