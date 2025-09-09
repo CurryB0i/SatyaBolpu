@@ -46,7 +46,7 @@ const CultureReducer = (state: CultureState,action: CultureAction): CultureState
     }
 
     case 'SAVE_EDITOR_CONTENT' : {
-      localStorage.setItem('cultureContent',JSON.stringify(action.payload.content));
+      localStorage.setItem('cultureContent',action.payload.content);
       return {
         ...state,
         content: action.payload.content

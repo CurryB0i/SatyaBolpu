@@ -20,7 +20,7 @@ const Dashboard = () => {
   
   return (
     <>
-      <div className="max-w-screen xl:px-10 text-primary my-20 flex flex-col 
+      <div className="max-w-screen xl:px-10 text-primary my-10 mb-20 flex flex-col 
         gap-10 xl:gap-0 xl:flex-row flex-wrap items-center justify-center">
 
         <div className="w-full xl:w-2/3 flex flex-col items-center justify-between gap-5">
@@ -138,7 +138,7 @@ const Dashboard = () => {
 
           </div>
 
-          <Button className="sticky bottom-0" content="View All" />
+          <Button content="View All" />
 
         </div>
 

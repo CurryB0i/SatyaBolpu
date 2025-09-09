@@ -78,7 +78,7 @@ const NewPost = () => {
 
   useEffect(() => {
     if(postsApi.data) {
-       toast.success(`Post-${postsApi.data.shortTitle} successfully uploaded.`)
+       toast.success(`Post-${postsApi.data.post.shortTitle} successfully uploaded.`)
        postDispatch({
          type: 'CLEAR_POST'
        });

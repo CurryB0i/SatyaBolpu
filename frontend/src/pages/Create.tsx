@@ -17,23 +17,23 @@ const Create = () => {
         Create
       </div>
 
-      <div className="w-full flex flex-col items-center justify-center gap-5 text-black my-20">
+      <div className="w-2/3 md:w-1/2 lg:w-1/3 flex flex-col items-center justify-center gap-5 text-black my-20">
         <div 
-          className="w-1/4 flex items-center gap-5 text-[2rem] bg-white p-5 rounded-2xl
+          className="w-full flex items-center gap-5 text-[2rem] bg-white p-5 rounded-2xl
           cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
           onClick={() => navigate('/create/new-post')}
         >
           <p className="ml-auto">Post</p>
           <MdArticle className="ml-auto"/>
         </div>
-        <div className="w-1/4 flex items-center gap-5 text-[2rem] bg-white p-5 rounded-2xl
+        <div className="w-full flex items-center gap-5 text-[2rem] bg-white p-5 rounded-2xl
           cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
           onClick={() => navigate('/create/new-culture')}
         >
           <p className="ml-auto">Culture</p>
           <PiHandsPrayingBold className="ml-auto" />
         </div>
-        <div className="w-1/4 flex items-center gap-5 text-[2rem] bg-white p-5 rounded-2xl
+        <div className="w-full flex items-center gap-5 text-[2rem] bg-white p-5 rounded-2xl
           cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
           onClick={() => navigate('/create/new-tag')}>
           <p className="ml-auto">Tag</p>

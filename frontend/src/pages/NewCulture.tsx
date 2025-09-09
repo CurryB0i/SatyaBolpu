@@ -108,7 +108,7 @@ const NewCulture = () => {
 
   useEffect(() => {
     if(culturesApi.data) {
-       toast.success(`Culture-${culturesApi.data.name} successfully uploaded.`)
+       toast.success(`Culture-${culturesApi.data.culture.name} successfully uploaded.`)
        cultureDispatch({
          type: 'CLEAR_CULTURE'
        });

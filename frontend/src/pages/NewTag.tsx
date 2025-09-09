@@ -54,8 +54,8 @@ const NewTag = () => {
   }
 
   return (
-    <div className="w-full">
-      <div className="w-full my-20">
+    <div className="w-full my-20">
+      <div className="w-full mb-20">
         <Title title="New Tag"/>
       </div>
 
@@ -67,7 +67,7 @@ const NewTag = () => {
             Tag
           </label>
           <input 
-            className={`text-black w-1/3 font-semibold p-2`} 
+            className={`text-black w-2/3 font-semibold p-2`} 
             type="text" 
             id="tag" 
             name="tag" 

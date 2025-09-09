@@ -8,6 +8,7 @@ import { FaEdit, FaUpload } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import Button from "../components/Button";
 import { toast } from "react-toastify";
+import useApi from "../hooks/useApi";
 
 type FormErrorType = {
   name: string;
@@ -37,8 +38,10 @@ const CultureDetails = () => {
   const [formData,setFormData] = useState<CultureDetailsType>(initialFormData);
   const [errors,setErrors] = useState<FormErrorType>(initialFormErrors);
   const [submitted, setSubmitted] = useState(false);
+  const [existingCultures,setExistingCultures] = useState<string[]>([]);
   const [saving,setSaving] = useState<boolean>(false);
 
+  const culturesApi = useApi('/cultures');
   const { state: authState } = useAuth();
   const { state: cultureState, dispatch: cultureDispatch } = useCulture();
   const navigate = useNavigate();
@@ -76,6 +79,18 @@ const CultureDetails = () => {
 
     loadFiles();
   }, [cultureState]);
+
+  useEffect(() => {
+    if(culturesApi.error) {
+      toast.error(culturesApi.error);
+    }
+  },[culturesApi.error]);
+
+  useEffect(() => {
+    if(culturesApi.data) {
+      setExistingCultures(culturesApi.data.cultures.map(c => c.name.toLowerCase()));
+    }
+  },[culturesApi.data]);
 
   useEffect(() => {
     const el = descrRef.current;
@@ -156,6 +171,13 @@ const CultureDetails = () => {
 
     if(formData.name && formData.name.length < 5) {
       newErrors.name = "Culture name should be atleast 5 characters long.";
+    }
+
+    if(existingCultures.length > 0 && existingCultures.includes(formData.name.toLowerCase())) {
+      newErrors.name = "A Culture with this name already exists.";
+      setErrors(newErrors);
+      setSaving(false);
+      return;
     }
 
     if(!formData.descriptiveName.trim()) {

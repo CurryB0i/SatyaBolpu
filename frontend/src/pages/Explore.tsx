@@ -13,7 +13,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 type CultureType = {
   name: string;
-  descr: string;
+  description: string;
   image: string | File;
   posts: number;
 }
@@ -75,13 +75,13 @@ useLayoutEffect(() => {
           style={{
             backgroundImage: `url(${BASE_URL}${culture.image})`
           }}>
-            <div className="w-1/2 flex flex-col items-center justify-center bg-black/70
+            <div className="w-[95%] md:w-2/3 lg:w-1/2 flex flex-col items-center justify-center bg-black/70
               rounded-2xl p-3 gap-5">
               <div className="text-[3rem] font-black">
                 <h1>{culture.name}</h1>
               </div>
-              <div className="w-full text-center">
-                <p>{culture.descr}</p>
+              <div className="w-full text-justify">
+                <p>{culture.description}</p>
               </div>
               <Button 
                 content="Explore"

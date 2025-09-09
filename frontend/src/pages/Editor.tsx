@@ -73,12 +73,13 @@ const Editor = ({ mode } : { mode: Mode }) => {
       setEditorState('submitted');
     } else if(mode === Mode.CULTURE && cultureState.content) {
       (async () => {
+        console.log(cultureState.content)
         const indexedContent = await getIndexedFiles(cultureState.content!);
         setBody(indexedContent);
       })()
       setEditorState('submitted');
     }
-  },[])
+  },[]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -305,7 +306,6 @@ const Editor = ({ mode } : { mode: Mode }) => {
 
   const handleSubmit = useCallback(() => {
     const content = formatHtml(editor.getHTML());
-    console.log(content)
     if(!content) {
       toast.error("Editor content cannot be empty!");
       return;
