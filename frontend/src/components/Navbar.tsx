@@ -48,25 +48,25 @@ const Navbar = () => {
   const AuthLinks = ({ extraClass = '' }: { extraClass?: string }) => {
     if(!state.token) {
         return (
-            <div
-              className={`flex gap-2 rounded-3xl overflow-hidden cursor-pointer text-sm sm:text-xl
-                location.pathname !== '/' ? 'bg-white text-black' : 'bg-black text-white'
-                ${extraClass}`}
-            >
-              <NavLink to="/login" className="hover:bg-primary p-2 pl-3">
-                Log In
-              </NavLink>
-              <NavLink to="/signup" className="hover:bg-primary p-2 pr-3">
-                Sign Up
-              </NavLink>
-            </div>
+          <div
+            className={`flex rounded-3xl overflow-hidden cursor-pointer text-sm sm:text-xl
+              location.pathname !== '/' ? 'bg-white text-black' : 'bg-black text-white'
+              ${extraClass}`}
+          >
+            <NavLink to="/login" className="hover:bg-primary p-1 sm:p-2">
+              Log In
+            </NavLink>
+            <NavLink to="/signup" className="hover:bg-primary p-1 sm:p-2">
+              Sign Up
+            </NavLink>
+          </div>
         )
     } else {
         return (
-            <NavLink to={'/profile'} className={`text-[2rem] cursor-pointer hover:text-primary hover:scale-110
-              transition-all duration-200 ${location.pathname === '/profile' ? 'text-primary' : ''}`}>
-              <CgProfile />
-            </NavLink>
+          <NavLink to={'/profile'} className={`text-[2rem] cursor-pointer hover:text-primary hover:scale-110
+            transition-all duration-200 ${location.pathname === '/profile' ? 'text-primary' : ''}`}>
+            <CgProfile />
+          </NavLink>
         )
     }
   };
@@ -128,15 +128,15 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`navbar z-[9999] text-white w-screen flex p-7 items-center justify-between`}
+        className={`z-[9999] text-white w-screen flex p-3 md:p-7 items-center justify-between`}
         style={navbarStyles}
       >
-        <div className="brand flex gap-2 items-center justify-center">
+        <div className="flex gap-1 md:gap-2 items-center justify-center">
           <NavLink to="/">
-            <img src="/assets/logoen.png" alt="logo" className="logo w-14 aspect-square" />
+            <img src="/assets/logoen.png" alt="logo" className="logo w-10 sm:w-14 aspect-square" />
           </NavLink>
           <NavLink to="/" style={{ textShadow: '1px 1px 6px black' }}>
-            <h1 className="text-2xl sm:text-3xl font-bold">SatyaBolpu</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">SatyaBolpu</h1>
           </NavLink>
         </div>
 

@@ -106,60 +106,60 @@ const Login = () => {
         return <Navigate to={'/profile'} replace/>
 
     return (
-        <div className="w-full h-screen text-primary flex flex-col items-center justify-center">
-            <form
-                onSubmit={handleSubmit}
-                className="w-4/5 md:w-3/5 lg:w-2/5 xl:w-2/5 h-3/4 border-4 border-white border-solid rounded-2xl
-              flex flex-col items-center justify-evenly text-[2rem]"
-            >
-                <h1 className="text-[4rem] font-semibold">Login</h1>
+      <div className="w-full h-screen text-primary flex flex-col items-center justify-center">
+        <form
+          onSubmit={handleSubmit}
+          className="w-[95%] sm:w-4/5 md:w-3/5 lg:w-2/5 xl:w-2/5 h-3/4 border-4 border-white border-solid rounded-2xl
+          flex flex-col items-center justify-evenly text-[2rem]"
+        >
+          <h1 className="text-[3rem] sm:text-[4rem] font-semibold">Login</h1>
 
-                {errors.length > 0 && (
-                  <ul className="text-red-500 list-disc text-[1.2rem] bg-red-100 p-4 pl-10 w-[80%] rounded-lg">
-                    {errors.map((err, i) => (
-                      <li key={i}>{err}</li>
-                    ))}
-                  </ul>
-                )}
+          {errors.length > 0 && (
+            <ul className="text-red-500 list-disc text-[1.2rem] bg-red-100 p-4 pl-10 w-[80%] rounded-lg">
+              {errors.map((err, i) => (
+                <li key={i}>{err}</li>
+              ))}
+            </ul>
+          )}
 
-                <div className="w-2/3 flex flex-col">
-                    <label htmlFor="email">Email:</label>
-                    <input
-                        className="text-black p-2 text-[1.5rem] border-2 border-solid border-gray-300 rounded-md"
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleFormDataChange}
-                    />
-                </div>
+          <div className="w-4/5 sm:w-2/3 flex flex-col">
+            <label htmlFor="email">Email:</label>
+            <input
+              className="text-black p-2 text-[1rem] sm:text-[1.5rem] border-2 border-solid border-gray-300 rounded-md"
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleFormDataChange}
+            />
+          </div>
 
-                <div className="w-2/3 flex flex-col">
-                    <label htmlFor="password" className="flex items-center justify-between">
-                        Password:
-                        <div
-                            className="cursor-pointer"
-                            onClick={() => setShowPassword(!showPassword)}
-                        >
-                            {showPassword ? <GrFormViewHide /> : <GrFormView />}
-                        </div>
-                    </label>
-                    <div className="w-full">
-                        <input
-                            className="text-black p-2 w-full text-[1.5rem] border-2 border-solid border-gray-300 rounded-md"
-                            type={showPassword ? "text" : "password"}
-                            id="password"
-                            name="password"
-                            ref={passwordRef}
-                            value={formData.password}
-                            onChange={handleFormDataChange}
-                        />
-                    </div>
-                </div>
+          <div className="w-4/5 sm:w-2/3 flex flex-col">
+            <label htmlFor="password" className="flex items-center justify-between">
+              Password:
+              <div
+                className="cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <GrFormViewHide /> : <GrFormView />}
+              </div>
+            </label>
+            <div className="w-full">
+              <input
+                className="text-black p-2 w-full text-[1rem] sm:text-[1.5rem] border-2 border-solid border-gray-300 rounded-md"
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                ref={passwordRef}
+                value={formData.password}
+                onChange={handleFormDataChange}
+              />
+            </div>
+          </div>
 
-                <Button loading={buttonLoad} loadingText="Logging In" className="text-[1.5rem]" type="submit" content="Login" />
-            </form>
-        </div>
+          <Button loading={buttonLoad} loadingText="Logging In" className="text-[1.5rem]" type="submit" content="Login" />
+        </form>
+      </div>
     );
 };
 

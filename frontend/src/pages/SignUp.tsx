@@ -103,11 +103,11 @@ const SignUp = () => {
   return (
     <div className="w-screen min-h-screen text-primary flex flex-col items-center justify-center py-32">
       <form
-        className="w-[90%] md:w-4/5 lg:w-3/5 xl:w-1/2 gap-5 border-4 border-white border-solid rounded-2xl
+        className="w-[95%] sm:w-[90%] md:w-4/5 lg:w-3/5 xl:w-1/2 gap-5 border-4 border-white border-solid rounded-2xl
         flex flex-col items-center justify-evenly py-10 text-[1.5rem]"
         onSubmit={handleSubmit}
       >
-        <h1 className="text-[4rem] font-semibold">Sign Up</h1>
+        <h1 className="text-[3rem] sm:text-[4rem] font-semibold">Sign Up</h1>
         
         {errors.length > 0 && (
           <ul className="text-red-500 list-disc text-[1.2rem] bg-red-100 p-4 pl-10 w-[80%] rounded-lg">
@@ -117,10 +117,10 @@ const SignUp = () => {
           </ul>
         )}
 
-        <div className="w-4/5 md:w-2/3 flex flex-col">
-          <label htmlFor="name">Name:</label>
+        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col">
+          <label className="text-[1.2rem] sm:text-[1.5rem]" htmlFor="name">Name:</label>
           <input
-            className="text-black p-2 text-[1.5rem]"
+            className="text-black p-1 sm:p-2 text-[1.5rem]"
             type="text"
             id="name"
             name="name"
@@ -130,10 +130,10 @@ const SignUp = () => {
           />
         </div>
 
-        <div className="w-4/5 md:w-2/3 flex flex-col">
-          <label htmlFor="name">Username:</label>
+        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col">
+          <label className="text-[1.2rem] sm:text-[1.5rem]" htmlFor="name">Username:</label>
           <input
-            className="text-black p-2 text-[1.5rem]"
+            className="text-black p-1 sm:p-2 text-[1.5rem]"
             type="text"
             id="uname"
             name="uname"
@@ -143,10 +143,10 @@ const SignUp = () => {
           />
         </div>
 
-        <div className="w-4/5 md:w-2/3 flex flex-col">
-          <label htmlFor="email">Email:</label>
+        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col">
+          <label className="text-[1.2rem] sm:text-[1.5rem]" htmlFor="email">Email:</label>
           <input
-            className="text-black p-2 text-[1.5rem]"
+            className="text-black p-1 sm:p-2 text-[1.5rem]"
             type="email"
             id="email"
             name="email"
@@ -156,8 +156,8 @@ const SignUp = () => {
           />
         </div>
 
-        <div className="w-4/5 md:w-2/3 flex flex-col" data-lenis-prevent>
-          <label htmlFor="phone">Phone:</label>
+        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col" data-lenis-prevent>
+          <label className="text-[1.2rem] sm:text-[1.5rem]" htmlFor="phone">Phone:</label>
           <PhoneInput
             country={'in'}
             value={formData.phone}
@@ -165,22 +165,22 @@ const SignUp = () => {
             inputStyle={{
               width: '100%',
               textAlign: 'center',
-              padding: '1.75rem',
+              padding: '1.5rem',
               fontSize: '1.5rem',
               color: 'black'
             }}
           />
         </div>
 
-        <div className="w-4/5 md:w-2/3 flex flex-col">
-          <label htmlFor="password" className="flex items-center justify-between">
+        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col">
+          <label htmlFor="password" className="flex items-center justify-between text-[1.2rem] sm:text-[1.5rem]">
             Password:
             <div className="cursor-pointer" onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <GrFormViewHide /> : <GrFormView />}
             </div>
           </label>
           <input
-            className="text-black p-2 text-[1.5rem]"
+            className="text-black p-1 sm:p-2 text-[1.5rem]"
             type={showPassword ? "text" : "password"}
             id="password"
             name="password"
@@ -190,10 +190,10 @@ const SignUp = () => {
           />
         </div>
 
-        <div className="w-4/5 md:w-2/3 flex flex-col">
-          <label htmlFor="confirmPassword">Confirm Password:</label>
+        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col">
+          <label className="text-[1.2rem] sm:text-[1.5rem]" htmlFor="confirmPassword">Confirm Password:</label>
           <input
-            className="text-black p-2 text-[1.5rem]"
+            className="text-black p-1 sm:p-2 text-[1.5rem]"
             type={showPassword ? "text" : "password"}
             id="confirmPassword"
             name="confirmPassword"

@@ -12,8 +12,8 @@ const Create = () => {
     return <Navigate to={'/404'} replace/>
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
-      <div className="w-full mt-20 text-[5rem] text-primary text-center font-black">
+    <div className="w-full flex flex-col items-center justify-center my-20">
+      <div className="w-full text-[5rem] text-primary text-center font-black">
         Create
       </div>
 
