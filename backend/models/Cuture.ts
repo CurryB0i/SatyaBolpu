@@ -6,6 +6,7 @@ export interface ICulture extends Document {
   description: string;
   coverImages: string[];
   galleryImages: string[];
+  content: string;
   posts: number;
 }
 
@@ -29,6 +30,10 @@ const cultureSchema = new Schema<ICulture>({
   galleryImages: {
     type: [String],
     required: true
+  },
+  content: {
+    type: String,
+    required: true,
   },
   posts: {
     type: Number,

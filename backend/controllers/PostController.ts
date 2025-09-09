@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Post } from '../models/Post.js';
+import { Tag } from '../models/Tag.js';
 
 export const uploadPost = async (req: Request, res: Response) => {
   try {
@@ -9,12 +10,18 @@ export const uploadPost = async (req: Request, res: Response) => {
       return res.status(400).json({ msg: 'Missing Required Field' });
     }
 
+    const tagIds = [];
+    for(const tag of details.tags) {
+      const t = await Tag.findOne({ tag });
+      tagIds.push(t?._id);
+    }
+
     const newPost = await Post.create({
       mainTitle: details.mainTitle,
       shortTitle: details.shortTitle,
       culture: details.culture,
       description: details.description,
-      tags: details.tags,
+      tags: tagIds,
       image: details.image,
       content,
       location: mapDetails || undefined,

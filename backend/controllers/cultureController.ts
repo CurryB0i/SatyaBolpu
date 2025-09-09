@@ -40,7 +40,7 @@ export const uploadCulture = async (req: Request, res: Response) => {
 
     const doesExist = await Culture.findOne({ name: details.name });
     if(doesExist) {
-      return res.status(400).json({ msg: `Culture '${name}' already exists.` })
+      return res.status(400).json({ msg: `Culture '${details.name}' already exists.` })
     }
 
     const newCulture = await Culture.create({
@@ -48,12 +48,12 @@ export const uploadCulture = async (req: Request, res: Response) => {
       descriptiveName: details.descriptiveName,
       description: details.description,
       coverImages: details.coverImages,
-      galleryImages: details.galleryImages.
-      content, 
+      galleryImages: details.galleryImages,
+      content: content, 
       posts: 0 
     });
     const { _id, __v, ...rest } = newCulture.toObject();
-    return res.status(201).json({ post: { id: _id, ...rest } });
+    return res.status(201).json({ culture: { id: _id, ...rest } });
 
   } catch(err: any) {
     console.error("Upload Cultures Error: " + err.message);
