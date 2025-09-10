@@ -88,7 +88,7 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
                     ...(mergedOptions.headers || {})
                 };
             }
-            const res = await fetch(`http://localhost:3000/api${endpoint}`, requestOptions);
+            const res = await fetch(`http://192.168.1.33:3000/api${endpoint}`, requestOptions);
             
             if (!res.ok) {
               let errorMessage = `HTTP ${res.status}: ${res.statusText}`;

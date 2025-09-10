@@ -1,8 +1,9 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Button from "../components/Button";
-import PhoneInput from 'react-phone-input-2'
-import 'react-phone-input-2/lib/style.css'
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import useApi from "../hooks/useApi";
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
@@ -17,194 +18,286 @@ type SignUpProps = {
   confirmPassword: string;
 };
 
-const initialFormData = {
-    name: '',
-    uname: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: ''
-}
+const initialFormData: SignUpProps = {
+  name: "",
+  uname: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+};
+
+const steps = ["Basic Info", "Contact Info", "Security"];
 
 const SignUp = () => {
   const [formData, setFormData] = useState<SignUpProps>(initialFormData);
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
+  const [errors, setErrors] = useState<SignUpProps>(initialFormData);
   const [buttonLoad, setButtonLoad] = useState<boolean>(false);
-  const { data, error, loading, post } = useApi("/auth/signup",{auto: false});
+  const [step, setStep] = useState<number>(0);
+
+  const { data, error, loading, post } = useApi("/auth/signup", { auto: false });
   const { state, dispatch } = useAuth();
 
   const handleFormDataChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    setErrors((prev) => ({
+      ...prev,
+      [name]: ''
+    }));
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  useEffect(() => {
-      const savedData = sessionStorage.getItem('signup-data');
-      if (savedData) {
-          setFormData(JSON.parse(savedData));
+  const handlePhoneNoChange = (phone: string) => {
+    setErrors((prev) => ({
+      ...prev,
+      phone: ''
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      phone
+    }));
+  }
+
+  const validateForm = (step: number) => {
+    const newErrors: SignUpProps = { ...initialFormData };
+
+    if (step === 1) {
+      if (!formData.name.trim()) newErrors.name = "Name is required.";
+    } else if (step === 2) {
+      if (!formData.email.trim()) {
+        newErrors.email = "Email is required.";
+      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        newErrors.email = "Invalid email format.";
       }
-  },[])
 
-  const validateForm = () => {
-    const errorList: string[] = [];
+      if (!formData.phone?.trim()) newErrors.phone = "Phone number is required.";
+    } else if (step === 3) {
+      if (!formData.password) {
+        newErrors.password = "Password is required.";
+      } else if (formData.password.length < 6) {
+        newErrors.password = "Password must be at least 6 characters.";
+      }
 
-    if (!formData.name.trim()) errorList.push("Name is required.");
-    if (!formData.email.trim()) errorList.push("Email is required.");
-    if (!/\S+@\S+\.\S+/.test(formData.email)) errorList.push("Invalid email format.");
-    if (!formData.phone?.trim()) errorList.push("Phone number is required.");
-    if (!formData.password) errorList.push("Password is required.");
-    if (formData.password.length < 6) errorList.push("Password must be at least 6 characters.");
-    else if (formData.password !== formData.confirmPassword) errorList.push("Passwords do NOT match.");
+      if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = "Passwords do NOT match.";
+      }
+    }
 
-    return errorList;
+    return newErrors;
   };
+
+  const handleNext = (step: number) => {
+    const newErrors = validateForm(step);
+    if (Object.values(newErrors).some(err => err !== '')) {
+      setErrors(newErrors);
+      return;
+    }
+    setStep(step);
+  }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    sessionStorage.setItem('signup-data',JSON.stringify(formData));
-    const validationErrors = validateForm();
-
-    if (validationErrors.length > 0) {
-      setErrors(validationErrors);
+    const newErrors = validateForm(3);
+    if (Object.values(newErrors).some(err => err != '')) {
+      setErrors(newErrors);
       return;
     }
-
-    setErrors([]);
     await post(formData);
   };
 
   useEffect(() => {
-      if (error) {
-          setErrors([error]);
-      }
+    if (error) {
+      toast.error(error);
+    }
 
-      if (data) {
-          setButtonLoad(loading);
-          dispatch({
-              type: 'LOGIN',
-              payload: {
-                  user: data.user,
-                  token: data.accessToken
-              }
-          });
-          toast.success(`Sign In Successful! Welcome ${data.user.name}`)
-          sessionStorage.removeItem('signup-data');
-          setFormData(initialFormData);
-      }
+    if (data) {
+      setButtonLoad(loading);
+      dispatch({
+        type: "LOGIN",
+        payload: {
+          user: data.user,
+          token: data.accessToken,
+        },
+      });
+      toast.success(`Sign In Successful! Welcome ${data.user.name}`);
+      setFormData(initialFormData);
+    }
   }, [data, error, loading]);
 
-  if(state.token) 
-      return <Navigate to={'/profile'} replace/>
+  if (state.token) return <Navigate to={"/profile"} replace />;
 
   return (
-    <div className="w-screen min-h-screen text-primary flex flex-col items-center justify-center py-32">
+    <div className="w-screen min-h-screen text-primary flex flex-col items-center justify-center">
       <form
-        className="w-[95%] sm:w-[90%] md:w-4/5 lg:w-3/5 xl:w-1/2 gap-5 border-4 border-white border-solid rounded-2xl
-        flex flex-col items-center justify-evenly py-10 text-[1.5rem]"
         onSubmit={handleSubmit}
+        className="w-full sm:w-[90%] md:w-2/3 lg:w-2/5 xl:w-1/3 border-[1px] border-white border-solid rounded-2xl 
+        flex flex-col items-center gap-8 px-6 py-10 bg-white/5 backdrop-blur-md shadow-lg"
       >
-        <h1 className="text-[3rem] sm:text-[4rem] font-semibold">Sign Up</h1>
-        
-        {errors.length > 0 && (
-          <ul className="text-red-500 list-disc text-[1.2rem] bg-red-100 p-4 pl-10 w-[80%] rounded-lg">
-            {errors.map((err, i) => (
-              <li key={i}>{err}</li>
-            ))}
-          </ul>
+        <h1 className="text-[2.5rem] sm:text-[3rem] font-bold">Sign Up</h1>
+        <div className="flex items-center gap-4 mb-4">
+          {steps.map((label, i) => (
+            <div
+              key={i}
+              className={`flex items-center gap-2 ${i === step ? "text-white" : "text-gray-400"}`}
+            >
+              <div
+                className={`w-8 h-8 flex items-center justify-center rounded-full 
+                ${i === step ? "bg-white text-black font-bold" : "border border-gray-400"}`}
+              >
+                {i + 1}
+              </div>
+              <span className="hidden sm:block">{label}</span>
+              {i < steps.length - 1 && <span className="text-gray-400">—</span>}
+            </div>
+          ))}
+        </div>
+
+
+        {step === 0 && (
+          <>
+            <div className="w-full flex flex-col gap-3">
+              <label htmlFor="name">Name:</label>
+              <input
+                className="text-black p-2 rounded-md text-[1.2rem]"
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleFormDataChange}
+                required
+              />
+              {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+            </div>
+
+            <div className="w-full flex flex-col gap-3">
+              <label htmlFor="uname">Username:</label>
+              <input
+                className="text-black p-2 rounded-md text-[1.2rem]"
+                type="text"
+                id="uname"
+                name="uname"
+                value={formData.uname}
+                onChange={handleFormDataChange}
+                required
+              />
+              {errors.uname && <p className="text-red-500 text-sm">{errors.uname}</p>}
+            </div>
+          </>
         )}
 
-        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col">
-          <label className="text-[1.2rem] sm:text-[1.5rem]" htmlFor="name">Name:</label>
-          <input
-            className="text-black p-1 sm:p-2 text-[1.5rem]"
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleFormDataChange}
-            required
-          />
-        </div>
-
-        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col">
-          <label className="text-[1.2rem] sm:text-[1.5rem]" htmlFor="name">Username:</label>
-          <input
-            className="text-black p-1 sm:p-2 text-[1.5rem]"
-            type="text"
-            id="uname"
-            name="uname"
-            value={formData.uname}
-            onChange={handleFormDataChange}
-            required
-          />
-        </div>
-
-        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col">
-          <label className="text-[1.2rem] sm:text-[1.5rem]" htmlFor="email">Email:</label>
-          <input
-            className="text-black p-1 sm:p-2 text-[1.5rem]"
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleFormDataChange}
-            required
-          />
-        </div>
-
-        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col" data-lenis-prevent>
-          <label className="text-[1.2rem] sm:text-[1.5rem]" htmlFor="phone">Phone:</label>
-          <PhoneInput
-            country={'in'}
-            value={formData.phone}
-            onChange={phone => setFormData(prev => ({ ...prev, phone }))}
-            inputStyle={{
-              width: '100%',
-              textAlign: 'center',
-              padding: '1.5rem',
-              fontSize: '1.5rem',
-              color: 'black'
-            }}
-          />
-        </div>
-
-        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col">
-          <label htmlFor="password" className="flex items-center justify-between text-[1.2rem] sm:text-[1.5rem]">
-            Password:
-            <div className="cursor-pointer" onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? <GrFormViewHide /> : <GrFormView />}
+        {step === 1 && (
+          <>
+            <div className="w-full flex flex-col gap-3">
+              <label htmlFor="email">Email:</label>
+              <input
+                className="text-black p-2 rounded-md text-[1.2rem]"
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleFormDataChange}
+                required
+              />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
-          </label>
-          <input
-            className="text-black p-1 sm:p-2 text-[1.5rem]"
-            type={showPassword ? "text" : "password"}
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleFormDataChange}
-            required
-          />
+
+            <div className="w-full flex flex-col gap-3" data-lenis-prevent>
+              <label htmlFor="phone">Phone:</label>
+              <PhoneInput
+                country={"in"}
+                value={formData.phone}
+                onChange={handlePhoneNoChange}
+                inputStyle={{
+                  width: "100%",
+                  textAlign: "center",
+                  padding: "1rem",
+                  fontSize: "1.2rem",
+                  color: "black",
+                  borderRadius: "8px",
+                }}
+              />
+              {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <div className="w-full flex flex-col gap-3">
+              <label htmlFor="password" className="flex justify-between">
+                Password:
+                <span
+                  className="cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <GrFormViewHide /> : <GrFormView />}
+                </span>
+              </label>
+              <input
+                className="text-black p-2 rounded-md text-[1.2rem]"
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleFormDataChange}
+                required
+              />
+              {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+            </div>
+
+            <div className="w-full flex flex-col gap-3">
+              <label htmlFor="confirmPassword">Confirm Password:</label>
+              <input
+                className="text-black p-2 rounded-md text-[1.2rem]"
+                type={showPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleFormDataChange}
+                required
+              />
+              {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
+            </div>
+          </>
+        )}
+
+        <div className="flex w-full justify-between mt-6">
+          {step > 0 ? (
+            <button
+              type="button"
+              className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-white hover:text-black transition"
+              onClick={() => setStep((prev) => prev - 1)}
+            >
+              <FaArrowLeft /> Back
+            </button>
+          ) : (
+            <span></span>
+          )}
+
+          {step < steps.length - 1 ? (
+            <button
+              type="button"
+              className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-white hover:text-black transition"
+              onClick={() => handleNext(step+1)}
+            >
+              Next <FaArrowRight />
+            </button>
+          ) : (
+            <Button
+              loading={buttonLoad}
+              loadingText="Signing In"
+              className="text-[1.2rem] px-6 py-2"
+              type="submit"
+              content="Sign Up"
+            />
+          )}
         </div>
-
-        <div className="w-[90%] sm:w-4/5 md:w-2/3 flex flex-col">
-          <label className="text-[1.2rem] sm:text-[1.5rem]" htmlFor="confirmPassword">Confirm Password:</label>
-          <input
-            className="text-black p-1 sm:p-2 text-[1.5rem]"
-            type={showPassword ? "text" : "password"}
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleFormDataChange}
-            required
-          />
-        </div>
-
-        <Button loading={buttonLoad} loadingText="Signing In" className="text-[1.5rem]" type="submit" content="Sign Up" />
-
       </form>
     </div>
   );

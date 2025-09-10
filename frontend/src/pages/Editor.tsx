@@ -1,6 +1,6 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { TextStyle } from '@tiptap/extension-text-style'
+import { LineHeight, TextStyle } from '@tiptap/extension-text-style'
 import { FontSize } from '../components/EditorExtensions/FontSize'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { RiAttachmentLine } from 'react-icons/ri';
@@ -55,6 +55,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
   });
   const [body,setBody] = useState<string>('');
   const [fontSize,setFontSize] = useState<string>('normal');
+  const [lineHeight,setLineHeight] = useState<string>('1.5rem');
   const [showAttachmentMenu,setShowAttachmentMenu] = useState<boolean>(false);
   const [askEmbedUrl,setAskEmbedUrl] = useState<boolean>(false);
   const [embedUrl,setEmbedUrl] = useState<string>('');
@@ -128,6 +129,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
     extensions: [
         StarterKit,
         TextStyle,
+        LineHeight,
         FontSize,
         ResizableImage,
         Video,
@@ -156,9 +158,12 @@ const Editor = ({ mode } : { mode: Mode }) => {
             bold: editor.isActive('bold'),
             italic: editor.isActive('italic'),
             underline: editor.isActive('underline')
-        })
+        });
         setFontSize(
             editor.getAttributes('textStyle').fontSize || 'normal'
+        );
+        setLineHeight(
+          editor.getAttributes('lineHeight').lineHeight || '1.5rem'
         )
     }
   });
@@ -175,6 +180,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
     if(editor) {
       setFontSize(e.target.value);
       editor.chain().focus().setFontSize(e.target.value).run();
+      editor.chain().focus().setLineHeight(e.target.value).run();
     }
   }
 
@@ -464,7 +470,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
             }
             <div className="w-full flex flex-col justify-center items-center gap-10 mb-10">
               <textarea
-                className="text-primary w-4/5 text-6xl text-center font-bold bg-black overflow-hidden
+                className="text-primary w-4/5 text-4xl sm:text-6xl text-center font-bold bg-black overflow-hidden
                            text-wrap focus:outline-none resize-none"
                 value={title}
                 rows={1}
@@ -481,14 +487,15 @@ const Editor = ({ mode } : { mode: Mode }) => {
 
             <EditorContent 
               editor={editor} 
-              className="text-white text-[1.5rem] w-[90%] p-5 whitespace-pre-wrap" />
+              className="text-white text-[1.5rem] w-[90%] p-5 whitespace-pre-wrap" 
+              style={{lineHeight: lineHeight}}/>
             
             <div className='flex md:flex-row flex-col gap-5 sticky bottom-10 items-center justify-center'>
                 <div className="flex items-center justify-center gap-2 bg-white p-3 rounded-full">
             
                     <div className='relative flex flex-col items-center justify-center' ref={attachmentRef}>
                         <button
-                          className={`text-[2rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
+                          className={`text-[1.2rem] sm:text-[2rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
                           onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}>
                             <RiAttachmentLine />
                             <input 
@@ -499,7 +506,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
                                 className='hidden'
                             />
                         </button>
-                        <ul className={`list-none text-nowrap absolute bg-white text-center bottom-full 
+                        <ul className={`list-none text-nowrap absolute left-0 bg-white text-center bottom-full 
                             mb-5 rounded-xl overflow-hidden transition-all duration-200 ${showAttachmentMenu ? 'h-auto' : 'h-0'}`}>
                             <li 
                               className='p-2 border border-solid border-t-2 hover:bg-primary cursor-pointer'
@@ -525,7 +532,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
                     </select>
 
                     <button
-                      className={`text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${
+                      className={`sm:text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${
                         clicked.bold ? 'text-primary scale-110' : 'text-black'
                       }`}
                       onClick={() => handleClick('bold')}
@@ -534,7 +541,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
                     </button>
 
                     <button
-                      className={`text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${
+                      className={`sm:text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${
                         clicked.italic ? 'text-primary scale-110' : 'text-black'
                       }`}
                       onClick={() => handleClick('italic')}
@@ -543,7 +550,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
                     </button>
 
                     <button
-                    className={`text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${
+                    className={`sm:text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${
                         clicked.underline ? 'text-primary scale-110' : 'text-black'
                       }`}
                       onClick={() => handleClick('underline')}
@@ -552,21 +559,21 @@ const Editor = ({ mode } : { mode: Mode }) => {
                     </button>
 
                     <button
-                        className={`text-[2rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
+                        className={`sm:text-[2rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
                         onClick={() =>  editor?.commands.toggleBlockquote()}
                     >
                         <GrBlockQuote />
                     </button>
 
                     <button
-                      className="text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg text-black "
+                      className="sm:text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg text-black "
                       onClick={() => editor.chain().focus().undo().run()}
                     >
                       <FaUndo />
                     </button>
 
                     <button
-                      className="text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg text-black "
+                      className="sm:text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg text-black "
                       onClick={() => editor.chain().focus().redo().run()}
                     >
                       <FaRedo />

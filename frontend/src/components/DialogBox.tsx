@@ -71,7 +71,7 @@ const DialogBox: React.FC<DialogBoxOptions> = (props) => {
         justify-center z-[9999] backdrop-blur-sm overflow-hidden select-none`} 
       ref={bgRef}>
         <div 
-          className="w-2/3 md:w-1/2 lg:w-1/3 bg-black border-2 border-solid border-primary h-1/3 
+          className="w-[90%] sm:w-2/3 md:w-1/2 lg:w-1/3 bg-black border-2 border-solid border-primary h-1/3 
             rounded-2xl flex flex-col text-center items-center justify-evenly"
           ref={dialogRef}>
             

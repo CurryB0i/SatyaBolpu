@@ -4,7 +4,7 @@ const Title = ({title} : {title: string}) => {
   return (
     <div className="w-full flex flex-col justify-center items-center gap-[3.2em] mb-10">
         <div
-          className="text-primary w-4/5 text-6xl text-center font-bold bg-black whitespace-pre-line break-words">
+          className="text-primary w-full text-4xl sm:text-6xl text-center font-bold bg-black whitespace-pre-line break-words">
             {title}
         </div>
 

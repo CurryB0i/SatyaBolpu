@@ -54,10 +54,9 @@ function App() {
         position='top-right'
         autoClose={3000}
         limit={5}
-        className='space-y-2'
         toastClassName={
           `relative font-semibold flex p-4 min-h-10 max-w-fit text-md rounded-md 
-          justify-between overflow-hidden cursor-pointer mb-2 shadow-lg`
+          justify-between overflow-hidden cursor-pointer m-2 shadow-lg`
         }
         closeButton={true}
         hideProgressBar={false}
@@ -69,7 +68,6 @@ function App() {
         pauseOnHover={true}
         theme='dark'
         style={{
-          width: '320px',
         }}
       />
       <Routes>

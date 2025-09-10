@@ -499,7 +499,7 @@ const PostDetails = () => {
             :
             <Button 
               content="Save"
-              className="text-[1.5rem] w-1/5 mx-auto"
+              className="text-[1.5rem] w-2/5 sm:w-1/5 mx-auto"
               type="submit"
               />
         }
@@ -508,12 +508,12 @@ const PostDetails = () => {
 
       <div className="flex w-screen items-center justify-between p-10">
         <div 
-          className={` text-[1.75rem] hover:text-primary text-white cursor-pointer`}
+          className={`text-[1.2rem] sm:text-[1.75rem] hover:text-primary text-white cursor-pointer`}
           onClick={() => navigate('/create/new-post')}>
             {`< Progress`}
         </div>
         <div 
-          className={` text-[1.75rem]
+          className={`text-[1.2rem] sm:text-[1.75rem]
           ${submitted ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
           onClick={handleNext}>
             {`Editor >`}

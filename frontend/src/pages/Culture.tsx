@@ -161,16 +161,16 @@ const Culture = () => {
           </div>
 
           <div 
-            className="w-screen h-screen text-primary relative font-black overflow-hidden"
+            className="w-screen h-[100vh] text-primary relative font-black overflow-hidden"
             ref={(el) => { if(el) sectionsRef.current[1] = el }}
           >
             <div 
-              className="w-screen h-screen text-center absolute left-0 flex gap-5 flex-col justify-center items-center"
+              className="w-screen h-[100vh] text-center absolute left-0 flex gap-5 flex-col justify-center items-center"
             >
               <div className="text-[2rem]">
                 The Deity Worship
               </div>
-              <div className="w-1/2 text-justify text-[1.25rem]">
+              <div className="w-[95%] md:w-1/2 text-justify text-sm md:text-[1.25rem]">
                 Daivaradhane / Bhootaradhane is practiced in the coastal region of Karnataka which is still practiced today.
                 Daivardhane refers to the worship of the divine power of guardians and ancestors by conducting rituals and ceremonies.
                 In Tulunadu, Daivardhane is a non-Vedic ritual. Early Tuluvas were not practitioners of the Vedas and Shastra,
@@ -192,15 +192,15 @@ const Culture = () => {
           </div>
 
           <div 
-            className="w-screen h-screen text-primary relative font-black overflow-hidden"
+            className="w-screen h-[100vh] text-primary relative font-black overflow-hidden"
             ref={(el) => { if(el) sectionsRef.current[2] = el }}
           >
             <div 
-              className="w-screen h-screen text-center absolute left-0 flex flex-wrap gap-1 
+              className="w-screen h-[100vh] text-center absolute left-0 flex flex-wrap gap-1 
                 justify-evenly items-center"
             >
               {
-                Array(100).fill(`${BASE_URL}${cultureData.image}`).map((item,index) => (
+                Array(100).fill(`${BASE_URL}${cultureData.coverImages[0]}`).map((item,index) => (
                   <div 
                     key={index} 
                     className="w-[10%] scale-0 opacity-50" 

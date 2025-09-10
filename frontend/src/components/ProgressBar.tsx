@@ -31,7 +31,7 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, state 
 
   return (
     <>
-      <div className="flex text-white w-1/2 h-10 bg-white 
+      <div className="flex text-white w-[80%] sm:w-2/3 md:w-1/2 h-10 bg-white 
         mx-auto items-center justify-between relative rounded-full">
         <div 
           className="absolute z-10 h-10 bg-primary transition-all duration-300" 
