@@ -32,7 +32,10 @@ function App() {
     const lenis = new Lenis({
       smoothWheel: true,
       lerp: 0.1,
-      wheelMultiplier: 1, 
+      wheelMultiplier: 1,
+      syncTouch: true,
+      syncTouchLerp: 0.1,
+      touchMultiplier: 1,
     });
 
     function raf(time: number) {

@@ -114,79 +114,60 @@ const Home = () => {
 
     return (
       <div className='home w-screen bg-black'>
-
-        <div className='hero w-full mb-[75vh]'>
-
-          <div className="layer1 relative w-full h-screen [background-image:url('/assets/Home/hero/bg2.webp')]
-                          bg-no-repeat bg-cover bg-fixed bg-center"
-                ref={(el) => {if(el) scrollWatcherRef.current[0] = el}}>
-            <div className='overlay w-full h-full absolute top-0 bg-[rgba(0,0,0,0.7)] z-0'></div>
-            <div className='w-full h-full relative flex flex-col items-center justify-center'>
-              <div className={`relative w-full text-center text-wrap text-[2.6rem] sm:text-[3.25rem] md:text-[4rem] lg:text-[5rem]
-                               xl:text-[6rem] 2xl:text-[7rem] whitespace-nowrap font-black [background-image:url('/assets/Home/hero/bg2.webp')]
-                               bg-no-repeat [background-size:100vw_100vh] bg-fixed bg-center [-webkit-text-fill-color:transparent]
-                               [-webkit-background-clip:text] bg-clip-text`}
-                   ref={(el) => {if(el) headingRefs.current[0] = el}}>
-                Welcome to Tulunadu
+        
+        <div className='relative w-full h-screen'>
+          <div className='w-full h-screen absolute grid place-items-center top-0 left-0 z-0'
+            style={{
+              clip: 'rect(0, auto, auto, 0)',
+            }}
+          >
+            <div 
+              className="fixed inset-0 w-full h-screen bg-no-repeat bg-cover bg-center -z-10
+                before:content-[''] before:fixed before:inset-0 before:opacity-60 before:z-10 before:bg-black"
+              style={{
+                backgroundImage: "url('/assets/Home/hero/bg2.webp')",
+              }}>
+            </div>
+            <div className='fixed w-full z-10 grid place-items-center'>
+              <div 
+                className='text-[3.5rem]/[3.5rem] lg:text-[5rem] font-black text-black
+                text-primary/75 text-center'
+                ref={(el) => { if(el) headingRefs.current[0] = el }}>
+                 Welcome To Tulunadu
               </div>
               <SVGHeader ref={svgRef}/>
             </div>
           </div>
+        </div>
 
-          <div className='layers2&3&4 flex'>
-            
-            <div className="layer2 relative w-full h-[200vh] bg-white [background-image:url('/assets/Home/hero/mountain.png')]
-                            bg-no-repeat bg-center bg-cover bg-fixed" 
-                 ref={layer2Ref}>
-              <div className='overlay w-full h-[200vh] absolute top-0 bg-[rgba(0,0,0,0.7)] z-10' 
-                   ref={(el) => {if(el) overlayRef.current[0] = el}}
-              ></div>
-              <div className="flex items-center justify-center sticky top-0 w-screen h-screen overflow-hidden">
-                <img className='absolute z-20 w-full h-full object-cover object-[center_5%]'
-                     src="/assets/Home/hero/foliage.png" alt="foliage" 
-                     ref={(el) => { if(el) foliageRef.current[0] = el }}/>
-                <div className='w-full p-5 text-center bg-[rgba(0,0,0,0.5)] text-stroke-2 text-stroke-color-primary text-[2.5rem]
-                                md:text-[3rem] lg:text-[4rem] xl:text-[5rem] 2xl:text-[6rem] font-black z-10 
-                                [-webkit-text-fill-color:transparent] [-webkit-background-clip:text] bg-clip-text' 
-                     ref={(el) => {if(el) headingRefs.current[1] = el}}>
-                  From The Western Ghats
-                </div>
-              </div>
+        <div className='relative w-full h-[100vh]'>
+          <div className='w-full h-screen absolute top-0 left-0'
+            style={{
+              clip: 'rect(0, auto, auto, 0)',
+            }}
+          >
+            <div 
+              className='fixed top-0 w-full h-screen bg-no-repeat bg-cover bg-center bg-white'
+              style={{
+                backgroundImage: "url('/assets/Home/hero/mountain.png')",
+              }}>
             </div>
-
-            <div className="layer3 relative w-full h-[300vh] [background-image:url('/assets/Home/hero/bg1.webp')]
-                            bg-no-repeat bg-center bg-cover bg-fixed"
-                 ref={layer3Ref}>
-              <div className='overlay w-full h-[200vh] absolute bottom-0 bg-[rgba(0,0,0,0)] z-10' 
-                   ref={(el) => {if(el) overlayRef.current[1] = el}}></div>
-              <div className="flex items-center justify-center sticky top-0 w-screen h-screen z-0 overflow-hidden">
-                <img className='absolute scale-[2] z-20 w-full h-full object-cover object-[center_5%]' 
-                     src="/assets/Home/hero/foliage.png" alt="foliage" 
-                     ref={(el) => { if(el) foliageRef.current[1] = el }}/>
-                <div className="w-full p-5 text-center bg-[rgba(0,0,0,0.5)] text-stroke-2 text-stroke-color-primary
-                                text-[2.5rem] md:text-[3rem] lg:text-[4rem] xl:text-[5rem] 2xl:text-[6rem] font-black
-                                z-10 [-webkit-text-fill-color:transparent] [-webkit-background-clip:text] bg-clip-text" 
-                     ref={(el) => {if(el) headingRefs.current[2] = el}}>
-                  To The Western Coast
-                </div>
-              </div>
-            </div>
-
-            <div className="layer4 relative w-full h-[400vh] [background-image:url('/assets/Home/hero/dasara.jpg')]
-                            bg-no-repeat bg-center bg-cover bg-fixed">
-              <div className='overlay w-full h-[200vh] absolute bottom-[100vh] bg-[rgba(0,0,0,0.7)] z-10'></div>
-              <div className="flex items-center justify-center sticky top-0 w-screen h-screen z-0 overflow-hidden">
-                <div className="w-full p-5 text-center bg-[rgba(0,0,0,0.5)] text-stroke-2 text-stroke-color-primary
-                                text-[2.5rem] md:text-[3rem] lg:text-[4rem] xl:text-[5rem] 2xl:text-[6rem] font-black
-                                z-10 [-webkit-text-fill-color:transparent] [-webkit-background-clip:text] bg-clip-text"
-                     ref={(el) => {if(el) headingRefs.current[3] = el}}>
-                  Dive Into The Sacred Realm
-                </div>
-              </div>
-            </div>
-
           </div>
+        </div>
 
+        <div className='relative w-full h-screen'>
+          <div className='w-full h-screen absolute top-0 left-0'
+            style={{
+              clip: 'rect(0, auto, auto, 0)',
+            }}
+          >
+            <div 
+              className='fixed top-0 w-full h-screen bg-no-repeat bg-cover bg-center'
+              style={{
+                backgroundImage: "url('/assets/Home/hero/bg1.webp')",
+              }}>
+            </div>
+          </div>
         </div>
 
         <div className='map w-full h-screen flex flex-col lg:flex-row gap-5 items-center justify-center p-10 mb-[100vh]'
