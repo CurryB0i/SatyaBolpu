@@ -19,7 +19,7 @@ const Profile = () => {
   const handleLogout = () => {
     dialog.popup({
       title: "Logging Out",
-      descr: "Are you sure you want to log out?",
+      description: "Are you sure you want to log out?",
       severity: "risky",
       onConfirm: async () => {
         try {
@@ -94,11 +94,16 @@ const Profile = () => {
         <div className="min-w-[40%]">
           <p className="text-[1.2rem] font-semibold">Phone:</p>
           <div className="bg-white p-2 rounded-lg outline outline-primary break-words">
-            {state.user?.phone || <span className="italic text-gray-500">Not Provided</span>}
+            {
+              state.user?.phone ? 
+                "+" + state.user.phone.dialCode + " " + state.user.phone.number :
+                <span className="italic text-gray-500">Not Provided</span>
+            }
           </div>
         </div>
 
         <Button
+          theme="light"
           loading={buttonLoad}
           loadingText="Logging Out"
           onClick={handleLogout}

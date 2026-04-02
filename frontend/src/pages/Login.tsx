@@ -5,11 +5,7 @@ import useApi from "../hooks/useApi";
 import { useAuth } from "../context/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
-type LoginProps = {
-  email: string;
-  password: string;
-};
+import { LoginProps } from "../types/globals";
 
 const initialLoginData = {
   email: "",
@@ -87,7 +83,15 @@ const Login = () => {
           token: data.accessToken,
         },
       });
-      toast.success(`Welcome back ${data.user.name}`);
+      const names: string[] = data.user.name.split(' ');
+      let finalName;
+      if(names.length < 2) {
+        finalName = names[0];
+      } else {
+        finalName = names.find(n => n.length > 5 );
+      }
+      finalName = finalName!.length > 10 ? `${finalName!.slice(0, 10)}...` : finalName;
+      toast.success(`Welcome back ${finalName}`);
 
       setFormData({
         email: "",
@@ -116,7 +120,7 @@ const Login = () => {
         <div className="w-full flex flex-col gap-2">
           <label htmlFor="email" className="text-[1.2rem]">Email:</label>
           <input
-            className="text-black p-3 text-[1.2rem] border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-white"
+            className="text-white p-3 text-[1.2rem] border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-white"
             type="email"
             id="email"
             name="email"
@@ -137,7 +141,7 @@ const Login = () => {
             </span>
           </label>
           <input
-            className="text-black p-3 text-[1.2rem] border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-white"
+            className="text-white p-3 text-[1.2rem] border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-white"
             type={showPassword ? "text" : "password"}
             id="password"
             name="password"

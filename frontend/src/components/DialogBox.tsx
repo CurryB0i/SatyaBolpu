@@ -3,8 +3,8 @@ import { useLayoutEffect, useRef } from "react";
 import { FaInfoCircle } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import Button from "./Button";
-import { DialogBoxOptions } from "../context/DialogBoxContext";
 import Form from "./Form";
+import { DialogBoxOptions } from "../types/globals";
 
 const DialogBox: React.FC<DialogBoxOptions> = (props) => {
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -92,7 +92,7 @@ const DialogBox: React.FC<DialogBoxOptions> = (props) => {
             </div>
 
             <div className="w-[90%] text-white flex items-center justify-center text-wrap">
-                {props.descr}
+                {props.description}
             </div>
 
             {

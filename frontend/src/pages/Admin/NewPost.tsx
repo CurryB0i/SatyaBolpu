@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import Button from "../components/Button";
-import Title from "../components/Title";
-import { PostState, usePost } from "../context/PostContext";
+import Button from "../../components/Button";
+import Title from "../../components/Title";
+import { usePost } from "../../context/PostContext";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { useDialog } from "../context/DialogBoxContext";
-import useApi from "../hooks/useApi";
-import { clearEntityStore, getFile } from "../utils/FileStore";
-import ProgressBar from "../components/ProgressBar";
+import { useAuth } from "../../context/AuthContext";
+import { useDialog } from "../../context/DialogBoxContext";
+import useApi from "../../hooks/useApi";
+import { clearEntityStore, getFile } from "../../utils/FileStore";
+import ProgressBar from "../../components/ProgressBar";
 import { toast } from "react-toastify";
+import { PostState } from "../../types/globals";
+import { BASE_URL } from "../../App";
 
 const NewPost = () => {
   
@@ -20,7 +22,7 @@ const NewPost = () => {
   const { state: postState, dispatch: postDispatch } = usePost();
 
   const steps = useMemo(() => ({
-    'Post Details': 'post-details',
+    'Post Details': 'details',
     'Editor': 'editor',
     ...(postState.details?.locationSpecific && { 'Map Details': 'map' })
   }), [postState.details?.locationSpecific]);
@@ -53,12 +55,12 @@ const NewPost = () => {
           if (fileEl) {
             const idbKey = fileEl.getAttribute("data-idbkey");
             if (!idbKey) continue;
-            const file = await getFile({ entity: "post", type: "editor" },Number(idbKey));
+            const file = await getFile({ entity: "post", type: "editor" }, Number(idbKey));
             if (!file) continue;
             const formData = new FormData();
             formData.append("file", file);
             const res = await uploadApi.post(formData);
-            fileEl.setAttribute("src", res.path);
+            fileEl.setAttribute("src", `${BASE_URL}/${res.path}`);
             fileEl.removeAttribute("data-idbkey");
           }
         }
@@ -70,7 +72,7 @@ const NewPost = () => {
 
     dialog.popup({
       title: "Post Upload.",
-      descr:
+      description:
         "Are you sure you want to upload the post? All saved drafts will be cleared on upload.",
       onConfirm: uploadPost,
     });

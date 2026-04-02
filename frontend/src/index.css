@@ -1,8 +1,22 @@
-  @import url('https://fonts.googleapis.com/css2?family=Parkinsans:wght@300..800&display=swap');
-  @import url('https://fonts.googleapis.com/css2?family=Charm:wght@400;700&display=swap');
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Parkinsans:wght@300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Charm:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #E88138;
+
+  --font-cursive: "Charm", serif;
+
+  --height-1500vh: 1500vh;
+}
+
+@layer base {
+  * {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
 
 :root {
     font-family: "Parkinsans", serif;
@@ -14,13 +28,6 @@
     -moz-osx-font-smoothing: grayscale;
     interpolate-size: allow-keywords;
     --primary : #E87E36;
-}
-
-
-*{
-    padding: 0;
-    margin: 0;
-    border: none;
 }
 
 body{

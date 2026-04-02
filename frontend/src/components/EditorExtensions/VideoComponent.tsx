@@ -1,9 +1,10 @@
 import { useRef } from 'react';
 import BaseComponent from './BaseComponent';
+import { NodeViewProps } from '@tiptap/react';
 
-const VideoComponent = (props) => {
+const VideoComponent = (props: NodeViewProps) => {
   const { node } = props;
-  const vidRef = useRef<HTMLVideoElement | null>(null);
+  const vidRef = useRef<HTMLVideoElement>(null);
 
   const videoEl = (
     <video

@@ -1,5 +1,10 @@
 import { NodeViewWrapper } from '@tiptap/react';
 import { useRef, useState, useEffect, ReactNode } from 'react';
+import { Node as ProseMirrorNode } from 'prosemirror-model';
+
+export type NodeProps = {
+  node: ProseMirrorNode
+};
 
 interface BaseComponentProps {
   node: {
@@ -17,7 +22,7 @@ interface BaseComponentProps {
   selected: boolean;
   deleteNode: () => void;
   mediaElement: ReactNode;
-  mediaRef: React.RefObject<HTMLElement>;
+  mediaRef: React.RefObject<HTMLElement | null>;
   enableResize?: boolean;
   enableCaption?: boolean;
   enableAlign?: boolean;
@@ -161,7 +166,7 @@ const BaseComponent = ({
         {enableResize && selected && (
           <div
             onMouseDown={startResize}
-            className="absolute right-[-8px] bottom-[-8px] w-4 h-4 bg-blue-500 cursor-se-resize rounded-full"
+            className="absolute -right-2 -bottom-2 w-4 h-4 bg-blue-500 cursor-se-resize rounded-full"
           />
         )}
       </div>

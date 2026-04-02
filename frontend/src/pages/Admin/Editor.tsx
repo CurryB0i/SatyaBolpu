@@ -1,36 +1,32 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { LineHeight, TextStyle } from '@tiptap/extension-text-style'
-import { FontSize } from '../components/EditorExtensions/FontSize'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { FontSize } from '../../components/EditorExtensions/FontSize'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { RiAttachmentLine } from 'react-icons/ri';
 import { GrBlockQuote } from "react-icons/gr";
 import { MdCancel, MdPreview } from "react-icons/md";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo, FaSave, FaUpload, FaEdit } from 'react-icons/fa';
-import { ResizableImage } from '../components/EditorExtensions/Image';
-import { Video } from '../components/EditorExtensions/Video';
-import { Audio } from '../components/EditorExtensions/Audio';
-import Button from '../components/Button';
-import { Iframe } from '../components/EditorExtensions/Iframe';
-import { useAuth } from '../context/AuthContext';
+import { ResizableImage } from '../../components/EditorExtensions/Image';
+import { Video } from '../../components/EditorExtensions/Video';
+import { Audio } from '../../components/EditorExtensions/Audio';
+import Button from '../../components/Button';
+import { Iframe } from '../../components/EditorExtensions/Iframe';
+import { useAuth } from '../../context/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useDialog } from '../context/DialogBoxContext';
-import Title from '../components/Title';
-import { usePost } from '../context/PostContext';
-import { clearStore, getFile, saveFile } from '../utils/FileStore';
-import { useCulture } from '../context/CultureContext';
+import { useDialog } from '../../context/DialogBoxContext';
+import Title from '../../components/Title';
+import { usePost } from '../../context/PostContext';
+import { clearStore, getFile, saveFile } from '../../utils/FileStore';
+import { useCulture } from '../../context/CultureContext';
+import { Mode } from '../../types/enums';
 
 type clickedType = {
   bold: boolean;
   italic: boolean;
   underline: boolean;
-};
-
-export enum Mode {
-  POST,
-  CULTURE
 };
 
 const Editor = ({ mode } : { mode: Mode }) => {
@@ -55,7 +51,6 @@ const Editor = ({ mode } : { mode: Mode }) => {
   });
   const [body,setBody] = useState<string>('');
   const [fontSize,setFontSize] = useState<string>('normal');
-  const [lineHeight,setLineHeight] = useState<string>('1.5rem');
   const [showAttachmentMenu,setShowAttachmentMenu] = useState<boolean>(false);
   const [askEmbedUrl,setAskEmbedUrl] = useState<boolean>(false);
   const [embedUrl,setEmbedUrl] = useState<string>('');
@@ -64,35 +59,6 @@ const Editor = ({ mode } : { mode: Mode }) => {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const attachmentRef = useRef<HTMLDivElement | null>(null);
   const objectUrls = useRef<string[]>([]);
-
-  useLayoutEffect(() => {
-    if(mode === Mode.POST && postState.content) {
-      (async () => {
-        const indexedContent = await getIndexedFiles(postState.content!);
-        setBody(indexedContent);
-      })()
-      setEditorState('submitted');
-    } else if(mode === Mode.CULTURE && cultureState.content) {
-      (async () => {
-        console.log(cultureState.content)
-        const indexedContent = await getIndexedFiles(cultureState.content!);
-        setBody(indexedContent);
-      })()
-      setEditorState('submitted');
-    }
-  },[]);
-
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-        if(attachmentRef.current && !attachmentRef.current.contains(e.target as Node)) {
-            setShowAttachmentMenu(false);
-        }
-    }
-
-    window.addEventListener('mousedown',handleClick);
-
-    return () => window.removeEventListener('mousedown',handleClick);
-  },[])
 
   const getIndexedFiles = async (contentString: string): Promise<string> => {
     if (!contentString) return '';
@@ -125,11 +91,39 @@ const Editor = ({ mode } : { mode: Mode }) => {
     return doc.documentElement.outerHTML;
   };
 
+  useLayoutEffect(() => {
+    if(mode === Mode.POST && postState.content) {
+      (async () => {
+        const indexedContent = await getIndexedFiles(postState.content!);
+        setBody(indexedContent);
+        setEditorState('submitted');
+      })();
+    } else if(mode === Mode.CULTURE && cultureState.content) {
+      (async () => {
+        console.log(cultureState.content)
+        const indexedContent = await getIndexedFiles(cultureState.content!);
+        setBody(indexedContent);
+        setEditorState('submitted');
+      })()
+    }
+  },[cultureState.content, getIndexedFiles, mode, postState.content]);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+        if(attachmentRef.current && !attachmentRef.current.contains(e.target as Node)) {
+            setShowAttachmentMenu(false);
+        }
+    }
+
+    window.addEventListener('mousedown',handleClick);
+
+    return () => window.removeEventListener('mousedown',handleClick);
+  },[])
+
   const editor = useEditor({
     extensions: [
         StarterKit,
         TextStyle,
-        LineHeight,
         FontSize,
         ResizableImage,
         Video,
@@ -151,9 +145,10 @@ const Editor = ({ mode } : { mode: Mode }) => {
         }
       })();
       const hydrated = await getIndexedFiles(raw);
+      console.log(hydrated)
       editor.commands.setContent(hydrated);
     },
-    onUpdate: () => {
+    onUpdate: ({ editor }) => {
         setClicked({
             bold: editor.isActive('bold'),
             italic: editor.isActive('italic'),
@@ -162,9 +157,6 @@ const Editor = ({ mode } : { mode: Mode }) => {
         setFontSize(
             editor.getAttributes('textStyle').fontSize || 'normal'
         );
-        setLineHeight(
-          editor.getAttributes('lineHeight').lineHeight || '1.5rem'
-        )
     }
   });
 
@@ -180,7 +172,6 @@ const Editor = ({ mode } : { mode: Mode }) => {
     if(editor) {
       setFontSize(e.target.value);
       editor.chain().focus().setFontSize(e.target.value).run();
-      editor.chain().focus().setLineHeight(e.target.value).run();
     }
   }
 
@@ -301,7 +292,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
         localStorage.setItem('cultureContentDraft',editor.getHTML());
       }
     }
-  }, [editor, title]);
+  }, [editor, title, cultureDispatch, cultureState.details, mode, postDispatch, postState.details]);
 
   const handlePreview = useCallback(() => {
     if(editor) {
@@ -331,7 +322,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
           });
           localStorage.removeItem('postContentDraft');
           toast.success("Editor content Submitted.");
-          navigate('/create/new-post');
+          navigate('/create/post');
         } else {
           cultureDispatch({
             type: 'SAVE_EDITOR_CONTENT',
@@ -341,19 +332,19 @@ const Editor = ({ mode } : { mode: Mode }) => {
           });
           localStorage.removeItem('cultureContentDraft');
           toast.success("Editor content Submitted.");
-          navigate('/create/new-culture');
+          navigate('/create/culture');
         }
       }
     }
 
     dialog?.popup({
       title: 'Draft Submit',
-      descr: "Are you sure you want to submit the document?",
+      description: "Are you sure you want to submit the document?",
       severity: 'default',
       onConfirm: submit
     });
 
-  }, [editor, dialog]);
+  }, [editor, dialog, cultureDispatch, postDispatch, handlePreview, mode, navigate]);
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -430,11 +421,11 @@ const Editor = ({ mode } : { mode: Mode }) => {
     return <Navigate to={'/404'} replace/>
 
   if(mode === Mode.POST && !postState.details) {
-    return <Navigate to={'/create/new-post/post-details'} replace/>
+    return <Navigate to={'/create/post/details'} replace/>
   }
 
   if(mode === Mode.CULTURE && !cultureState.details) {
-    return <Navigate to={'/create/new-culture/culture-details'} replace/>
+    return <Navigate to={'/create/culture/details'} replace/>
   }
 
   return (
@@ -488,7 +479,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
             <EditorContent 
               editor={editor} 
               className="text-white text-[1.5rem] w-[90%] p-5 whitespace-pre-wrap" 
-              style={{lineHeight: lineHeight}}/>
+            />
             
             <div className='flex md:flex-row flex-col gap-5 sticky bottom-10 items-center justify-center'>
                 <div className="flex items-center justify-center gap-2 bg-white p-3 rounded-full">
@@ -644,11 +635,11 @@ const Editor = ({ mode } : { mode: Mode }) => {
 
         <div className="w-full flex items-center justify-between p-10">
           <div 
-            className="text-white text-[1.75rem] cursor-pointer hover:text-primary"
+            className="text-white text-[1.2rem] sm:text-[1.75rem] cursor-pointer hover:text-primary"
             onClick={() => 
                 mode === Mode.POST ? 
-                  navigate('/create/new-post/post-details') : 
-                  navigate('/create/new-culture/culture-details')
+                  navigate('/create/post/details') : 
+                  navigate('/create/culture/details')
             }
           >
             {
@@ -659,12 +650,22 @@ const Editor = ({ mode } : { mode: Mode }) => {
           </div>
 
           {
-            mode === Mode.POST && postState.details?.locationSpecific &&
+            mode === Mode.POST && (
               <div 
-                className="text-white text-[1.75rem] cursor-pointer hover:text-primary"
-                onClick={() => navigate('/create/new-post/map')}>
-                {`Map >`}
+                className="text-white text-[1.2rem] sm:text-[1.75rem] cursor-pointer hover:text-primary"
+                onClick={() => navigate(postState.details?.locationSpecific ? '/create/post/map' : '/create/post')}>
+                { postState.details?.locationSpecific ? `Map >` : 'Upload Post >'}
               </div>
+            )
+          }
+          {
+            editorState === "submitted" && mode === Mode.CULTURE && (
+              <div 
+                className="text-white text-[1.2rem] sm:text-[1.75rem] cursor-pointer hover:text-primary"
+                onClick={() => navigate('/create/post/map')}>
+                {`Upload Culture >`}
+              </div>
+            )
           }
         </div>
         

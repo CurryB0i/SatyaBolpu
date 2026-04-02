@@ -1,29 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useReducer, useRef } from "react";
 import useApi from "../hooks/useApi";
 import { jwtDecode } from 'jwt-decode';
-
-type User = {
-  id: string;
-  name: string;
-  uname: string;
-  email: string;
-  phone: string;
-  role: 'user' | 'admin';
-  verified: boolean;
-}
-
-type AuthState = {
-  user: User | null;
-  token: string | null;
-  isRefreshing: boolean;
-};
-
-type AuthAction =
-  | { type: 'LOGIN'; payload: { user: User; token: string } }
-  | { type: 'LOGOUT' }
-  | { type: 'REFRESH_START' }
-  | { type: 'REFRESH_SUCCESS'; payload: { user: User; token: string } }
-  | { type: 'REFRESH_FAILED' };
+import { AuthAction, AuthContextType, AuthState } from "../types/globals";
 
 const initialState: AuthState = {
   user: null,
@@ -55,11 +33,6 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       return state;
   }
 };
-
-type AuthContextType = {
-  state: AuthState;
-  dispatch: React.Dispatch<AuthAction>;
-}
 
 const AuthContext = createContext<AuthContextType>({
   state: initialState,
@@ -117,29 +90,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const scheduleTokenRefresh = useCallback((token: string) => {
     try {
       const { exp } = jwtDecode<{ exp: number }>(token);
-      const currentTime = Date.now() / 1000;
-      const timeUntilExpiry = exp - currentTime;
-      const refreshThreshold = 300;
-      
+      const currentTime = Math.floor(Date.now() / 1000);
       if (refreshTimeoutRef.current) {
         clearTimeout(refreshTimeoutRef.current);
-        refreshTimeoutRef.current = null;
       }
 
-      if (timeUntilExpiry > refreshThreshold) {
-        const refreshTime = (timeUntilExpiry - refreshThreshold) * 1000;
-        refreshTimeoutRef.current = setTimeout(() => {
-          refreshToken();
-        }, refreshTime);
-        
-        console.log(`Token refresh scheduled in ${Math.round(refreshTime / 1000)} seconds`);
-      } else if (timeUntilExpiry > 0) {
-        refreshToken();
-      } else {
-        console.warn('Token is already expired');
+      const timeUntilExpiry = exp - currentTime;
+      console.log(timeUntilExpiry)
+      const refreshThreshold = 60;
+
+      if (timeUntilExpiry <= 0) {
         dispatch({ type: 'LOGOUT' });
+        return;
       }
-    } catch (err) {
+
+      const refreshTime = Math.max((timeUntilExpiry - refreshThreshold) * 1000, 1000);
+
+      refreshTimeoutRef.current = setTimeout(() => {
+        refreshToken().catch(() => {});
+      }, refreshTime);    } 
+    catch (err) {
       console.error('Invalid token:', err);
       dispatch({ type: 'LOGOUT' });
     }

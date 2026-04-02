@@ -1,14 +1,13 @@
 import { useLayoutEffect, useMemo } from "react";
 import { MdDone } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import { PostState } from "../context/PostContext";
-import { CultureState } from "../context/CultureContext";
+import { CultureState, EventState, PostState } from "../types/globals";
 
 type PropsType = {
   steps: Record<string,string>;
   progress: number;
   setProgress: (progress: number) => void;
-  state: PostState | CultureState;
+  state: PostState | CultureState | EventState;
 }
 
 const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, state }) => {
@@ -64,7 +63,7 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, state 
                       <MdDone /> : index+1
                   }
                 </div>
-                <div className="absolute -bottom-10 text-nowrap cursor-pointer">
+                <div className="absolute text-sm md:text-lg -bottom-10 text-nowrap cursor-pointer">
                   {Object.keys(steps)[index]}
                 </div>
               </div>

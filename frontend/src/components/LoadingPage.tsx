@@ -1,7 +1,3 @@
-import gsap from 'gsap';
-import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-
 /*
 const LoadingPage = () => {
     const flameRef = useRef<SVGPathElement | null>(null);
@@ -87,7 +83,7 @@ const LoadingPage = () => {
 
     return (
         <div className={`w-screen h-screen flex flex-col fixed items-center justify-center 
-            bottom-0 overflow-hidden z-[9997] bg-black`}>
+            bottom-0 overflow-hidden z-9997 bg-black`}>
           <img 
            className='w-1/3'
            src="/assets/loading/gitige.gif" alt="loader" />

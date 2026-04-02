@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Post } from '../models/Post.js';
 import { Tag } from '../models/Tag.js';
+import { Culture } from '../models/Culture.js';
 
 export const uploadPost = async (req: Request, res: Response) => {
   try {
@@ -16,15 +17,21 @@ export const uploadPost = async (req: Request, res: Response) => {
       tagIds.push(t?._id);
     }
 
+    const cultureName = details.culture.charAt(0).toUpperCase() + details.culture.slice(1);
+    const culture = await Culture.findOne({ name: cultureName });
+    if(!culture) {
+      return res.status(400).json({ msg: 'Culture not found.' });
+    }
+
     const newPost = await Post.create({
       mainTitle: details.mainTitle,
       shortTitle: details.shortTitle,
-      culture: details.culture,
+      culture: culture._id,
       description: details.description,
       tags: tagIds,
       image: details.image,
       content,
-      location: mapDetails || undefined,
+      location: mapDetails
     });
 
     const { _id, __v, ...rest } = newPost.toObject();
@@ -36,3 +43,31 @@ export const uploadPost = async (req: Request, res: Response) => {
   }
 };
 
+export const getPosts = async (req: Request, res: Response) => {
+  try {
+    const posts = await Post.find();
+    if(!posts) {
+      return res.status(500).json({ msg: 'No posts found.' });
+    }
+
+    return res.status(200).json({ posts });
+  } catch(err: any) {
+    console.error('Error while fetching posts: ', err.message);
+    return res.status(500).json({ msg: 'Internal Server error while fetching posts.' });
+  }
+}
+
+export const getPost = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const post = await Post.findOne({ _id: id });
+    if(!post) {
+      return res.status(500).json({ msg: 'No posts found.' });
+    }
+
+    return res.status(200).json({ post });
+  } catch(err: any) {
+    console.error(`Error while fetching post with id ${req.params.id}: `, err.message);
+    return res.status(500).json({ msg: `Internal Server error while fetching post with id ${req.params.id}.` });
+  }
+}

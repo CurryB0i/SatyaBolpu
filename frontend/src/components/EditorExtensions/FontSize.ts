@@ -1,5 +1,16 @@
 import { Extension } from '@tiptap/core';
 
+const sizeMap = {
+  small: '1rem',
+  normal: '1.5rem',
+  large: '2rem',
+  huge: '2.5rem',
+};
+
+const reverseMap = Object.fromEntries(
+  Object.entries(sizeMap).map(([k, v]) => [v, k])
+);
+
 export const FontSize = Extension.create({
   name: 'fontSize',
 
@@ -17,13 +28,11 @@ export const FontSize = Extension.create({
         attributes: {
           fontSize: {
             default: null,
-            parseHTML: (element) => element.style.fontSize || null,
+            parseHTML: (element) => reverseMap[element.style.fontSize] || null,
             renderHTML: (attributes) => {
               if (!attributes.fontSize) return {};
-              return { style: `font-size: ${attributes.fontSize === 'small' ? '1rem' : 
-                                            attributes.fontSize === 'normal' ? '1.5rem' :
-                                            attributes.fontSize === 'large' ? '2rem' :
-                                            attributes.fontSize === 'huge' ? '2.5rem' : ''}` };
+              const size = sizeMap[attributes.fontSize as 'small' | 'large'];
+              return { style: `font-size: ${size}; line-height: ${size};` };
             },
           },
         },
@@ -34,13 +43,10 @@ export const FontSize = Extension.create({
   addCommands() {
     return {
       setFontSize: (fontSize) => ({ commands }) => {
-        if (!this.options.fontSizes.includes(fontSize)) {
-          return false;
-        }
-        return commands.setMark('textStyle', { fontSize });
+        return commands.setMark('textStyle', { fontSize })
       },
       unsetFontSize: () => ({ commands }) => {
-        return commands.removeMark('textStyle', { fontSize: null });
+        return commands.setMark('textStyle', { fontSize: null });
       },
     };
   },

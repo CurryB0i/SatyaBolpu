@@ -4,165 +4,456 @@ export type PropsType = {
   toVars: GSAPTweenVars;
 };
 
-const initalClipPaths = [
-    "polygon(0% 100%,50% 100%,50% 100%,0% 100%)",
-    "polygon(25% 0%,100% 0%,75% 0%,25% 0%)",
-    "polygon(25% 100%,75% 100%,75% 100%,0% 100%)",
-    "polygon(50% 0%,100% 0%,100% 0%,50% 0%)"
-]
-const finalClipPaths = [
-    "polygon(0% 0%,100% 0%,50% 100%,0% 100%)",
-    "polygon(25% 0%,100% 0%,50% 100%,0% 100%)",
-    "polygon(50% 0%,100% 0%,75% 100%,0% 100%)",
-    "polygon(50% 0%,100% 0%,100% 100%,0% 100%)"
-]
+const initalDesktopClipPaths = [
+  "polygon(0% 100%,50% 100%,50% 100%,0% 100%)",
+  "polygon(25% 0%,100% 0%,75% 0%,25% 0%)",
+  "polygon(25% 100%,75% 100%,75% 100%,0% 100%)",
+  "polygon(50% 0%,100% 0%,100% 0%,50% 0%)"
+];
+const finalDesktopClipPaths = [
+  "polygon(0% 0%,100% 0%,50% 100%,0% 100%)",
+  "polygon(25% 0%,100% 0%,50% 100%,0% 100%)",
+  "polygon(50% 0%,100% 0%,75% 100%,0% 100%)",
+  "polygon(50% 0%,100% 0%,100% 100%,0% 100%)"
+];
+const initalMobileClipPaths = [
+  "inset(0% 100% 0% 0%)",
+  "inset(0% 0% 0% 100%)",
+  "inset(0% 100% 0% 0%)",
+  "inset(0% 0% 0% 100%)"
+];
+const finalMobileClipPaths = [
+  "inset(0% 0% 0% 0%)",
+  "inset(0% 0% 0% 0%)",
+  "inset(0% 0% 0% 0%)",
+  "inset(0% 0% 0% 0%)"
+];
 
 export const buildAnimationProps = (
-  scrollWatcherRef: React.MutableRefObject<any[]>,
-  headingRefs: React.MutableRefObject<any[]>,
-  overlayRef: React.MutableRefObject<any[]>,
-  foliageRef: React.MutableRefObject<any[]>,
-  layer2Ref: React.MutableRefObject<any>,
-  layer3Ref: React.MutableRefObject<any>,
-  svgRef: React.MutableRefObject<any>,
-  mapRef: React.MutableRefObject<any>,
-  swiperRef: React.MutableRefObject<any>,
-  bgRefs: React.MutableRefObject<any>,
-  recentRefs: React.MutableRefObject<any[]>
+  scrollWatcherRef: React.MutableRefObject<HTMLDivElement[]>,
+  headingRefs: React.MutableRefObject<HTMLDivElement[]>,
+  foliageRefs: React.MutableRefObject<HTMLImageElement[]>,
+  overlayRef: React.RefObject<HTMLDivElement | null>,
+  imgRefs: React.MutableRefObject<HTMLImageElement[]>,
+  svgRef: React.MutableRefObject<SVGSVGElement | null>,
+  mapRef: React.MutableRefObject<HTMLDivElement | null>,
+  swiperOverlayRef: React.MutableRefObject<HTMLDivElement | null>,
+  bgRefs: React.MutableRefObject<HTMLDivElement[]>,
+  landmarkRefs: React.MutableRefObject<HTMLDivElement[]>,
+  buttonRefs: React.MutableRefObject<HTMLButtonElement[]>,
+  isMobile: boolean
 ): PropsType[] => {
-  const temp: PropsType[] = recentRefs.current.map((ref) => ({
+
+  const landmarksAnim: PropsType[] = landmarkRefs.current.map((ref, index) => ({
     ref,
-    fromVars: { opacity: 0 },
+    fromVars: {
+      clipPath: index%2 === 0 ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)"
+    },
     toVars: {
-      opacity: 1,
-      duration: 0.25,
+      clipPath: "inset(0% 0% 0% 0%)",
+      duration: 0.5,
       scrollTrigger: {
         trigger: ref,
-        start: 'top 60%',
+        start: 'top center',
       },
     },
   }));
 
   return [
-      { 
-        ref: headingRefs.current[0], 
-        fromVars: { top: '100px', opacity: 0 }, 
-        toVars: { top: '0px', opacity: 1, duration: 2, scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '-10px top' } } 
+    {
+      ref: headingRefs.current.slice(0, 3),
+      fromVars: {
+        opacity: 0 
       },
-      { 
-        ref: svgRef.current, 
-        fromVars: { strokeDashoffset: 400 }, 
-        toVars: { strokeDashoffset: 0, duration: 2, delay: 2, scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '-10px top' } } 
-      },
-      { 
-        ref: foliageRef.current[0], 
-        fromVars: {}, 
-        toVars: { scale: 2, scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '100% top', end: '125% top', scrub: true } } 
-      },
-      { 
-        ref: headingRefs.current[1], 
-        fromVars: { opacity: 0 }, 
-        toVars: { opacity: 1, ease: 'power1.inOut', 
-          scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '120% top', end: '140% top', toggleActions: 'play none none reverse' } 
+      toVars: { 
+        opacity: 1, 
+        stagger: 1, 
+        duration: 2, 
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[0], 
+          start: "-10px top" 
         } 
-      },
-      { 
-        ref: overlayRef.current[0], 
-        fromVars: {}, 
-        toVars: { backgroundColor: 'rgba(0,0,0,0)', ease: 'power1.inOut', 
-          scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '100% top', end: '140% top', scrub: true, toggleActions: 'play none none reverse' } 
+      }
+    },
+    {
+      ref: headingRefs.current.slice(0, 2),
+      fromVars: {  },
+      toVars: { 
+        opacity: 0, 
+        delay: 3.5, 
+        duration: 2, 
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[0], 
+          start: "-10px top" 
         } 
-      },
-      {
-        ref: foliageRef.current[0], 
-        fromVars: {}, 
-        toVars: { opacity: 0, ease: 'power1.inOut', 
-          scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '190% top', end: '200% top', toggleActions: 'play none none reverse' } 
+      }
+    },
+    {
+      ref: headingRefs.current[2],
+      fromVars: {  },
+      toVars: { 
+        translateY: "-60%", 
+        delay: 3.5, 
+        duration: 2, 
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[0], 
+          start: "-10px top"
         } 
-      },
-      {
-        ref: layer2Ref.current, 
-        fromVars: { width: '100%' }, 
-        toVars: { width: '0', ease: 'power1.inOut', 
-          scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '150% top', end: '200% top', toggleActions: 'play none none reverse', scrub: true } 
+      }
+    },
+    { 
+      ref: svgRef.current, 
+      fromVars: { 
+        strokeDashoffset: 400 
+      }, 
+      toVars: { 
+        strokeDashoffset: 0, 
+        duration: 2, 
+        delay: 4, 
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[0], 
+          start: '-10px top' 
         } 
-      },
-      { 
-        ref: headingRefs.current[2], 
-        fromVars: { opacity: 0 }, 
-        toVars: { opacity: 1, ease: 'power1.inOut', 
-          scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '200% top', end: '225% top', toggleActions: 'play none none reverse' } 
+      } 
+    },
+    { 
+      ref: foliageRefs.current[0], 
+      fromVars: { 
+        scale: 1 
+      }, 
+      toVars: { 
+        scale: 2, 
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '5% top', 
+          end: '20% top', 
+          scrub: true
         } 
-      },
-      { 
-        ref: foliageRef.current[1], 
-        fromVars: {}, 
-        toVars: { scale: 1, ease: 'power1.inOut', 
-          scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '220% top', end: '245% top', scrub: true } 
+      } 
+    },
+    { 
+      ref: overlayRef.current, 
+      fromVars: {}, 
+      toVars: { 
+        backgroundColor: 'rgba(0,0,0,0)', 
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '5% top', 
+          end: '20% top', 
+          scrub: true, 
+          toggleActions: 'play none none reverse'
         } 
-      },
-      { 
-        ref: overlayRef.current[1], 
-        fromVars: {}, 
-        toVars: { backgroundColor: 'rgba(0,0,0,0.7)', ease: 'power1.inOut', 
-          scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '225% top', end: '250% top', scrub: true, toggleActions: 'play none none reverse' } 
+      } 
+    },
+    { 
+      ref: headingRefs.current[3], 
+      fromVars: { 
+        opacity: 0 
+      }, 
+      toVars: { 
+        opacity: 1, 
+        duration: 0.5,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '15% top',
+          toggleActions: 'play none none reverse'
+        }
+      } 
+    },
+    { 
+      ref: foliageRefs.current[0], 
+      fromVars: { }, 
+      toVars: { 
+        opacity: 0,
+        duration: 0.5,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '15% top', 
+          toggleActions: 'play none none reverse'
         } 
+      } 
+    },
+    {
+      ref: imgRefs.current[0],
+      fromVars: { 
+        clipPath: "inset(0% 0% 0% 0%)" 
       },
-      { 
-        ref: layer3Ref.current, 
-        fromVars: { width: '100%' }, 
-        toVars: { width: '0', ease: 'power1.inOut', 
-          scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '250% top', end: '300% top', toggleActions: 'play none none reverse', scrub: true } 
+      toVars: {  
+        clipPath: "inset(0% 100% 0% 0%)",
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1],
+          start: '30% top',
+          end: '50% top',
+          scrub: true,
+          toggleActions: 'play none none reverse'
         } 
+      }
+    },
+    { 
+      ref: headingRefs.current[3], 
+      fromVars: { 
+        clipPath: "inset(0% 0% 0% 0%)"
+      }, 
+      toVars: { 
+        clipPath: "inset(0% 100% 0% 0%)",
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '30% top',
+          end: '50% top',
+          scrub: true,
+          toggleActions: 'play none none reverse'
+        }
+      } 
+    },
+    {
+      ref: imgRefs.current[1],
+      fromVars: { 
+        clipPath: "inset(0% 0% 0% 100%)"
       },
-      { 
-        ref: headingRefs.current[3], 
-        fromVars: { opacity: 0 }, 
-        toVars: { opacity: 1, ease: 'power1.inOut', 
-          scrollTrigger: { trigger: scrollWatcherRef.current[0], start: '300% top', end: '325% top', toggleActions: 'play none none reverse' } 
+      toVars: {  
+        clipPath: "inset(0% 0% 0% 0%)" ,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1],
+          start: '30% top',
+          end: '50% top',
+          scrub: true,
+          toggleActions: 'play none none reverse'
         } 
-      },
-      { 
-        ref: headingRefs.current[4], 
-        fromVars: { opacity: 0 }, 
-        toVars: { opacity: 1, duration: 1, 
-          scrollTrigger: { trigger: scrollWatcherRef.current[1], start: '-20% top' }
+      }
+    },
+    { 
+      ref: headingRefs.current[4], 
+      fromVars: { 
+        clipPath: "inset(0% 0% 0% 100%)"
+      }, 
+      toVars: { 
+        clipPath: "inset(0% 0% 0% 0%)" ,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '30% top',
+          end: '50% top',
+          scrub: true,
+          toggleActions: 'play none none reverse'
+        }
+      } 
+    },
+    { 
+      ref: foliageRefs.current[1], 
+      fromVars: { }, 
+      toVars: { 
+        opacity: 1,
+        duration: 0.5,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '55% top',
+          toggleActions: 'play none none reverse'
         } 
-      },
-      { 
-        ref: mapRef.current, 
-        fromVars: { height: '0' }, 
-        toVars: { height: '100%', duration: 1, 
-          scrollTrigger: { trigger: scrollWatcherRef.current[1], start: '-20% top' } 
+      } 
+    },
+    { 
+      ref: overlayRef.current, 
+      fromVars: {}, 
+      toVars: { 
+        backgroundColor: 'rgba(0,0,0,0.5)', 
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1],
+          start: '60% top',
+          end: '70% top',
+          scrub: true, 
+          toggleActions: 'play none none reverse' 
         } 
-      },
-      { 
-        ref: headingRefs.current[5], 
-        fromVars: { opacity: 0 }, 
-        toVars: { opacity: 1, duration: 1, 
-        scrollTrigger: { trigger: scrollWatcherRef.current[2], start: '-40% top' } 
-       } 
-      },
-      { 
-        ref: swiperRef.current, 
-        fromVars: { opacity: 1 }, 
-        toVars: { opacity: 0, zIndex: -10, duration: 1, scrollTrigger: { trigger: scrollWatcherRef.current[2], start: '-20% top' } 
+      } 
+    },
+    { 
+      ref: foliageRefs.current[1], 
+      fromVars: { }, 
+      toVars: { 
+        scale: 1,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '60% top',
+          end: '70% top',
+          scrub: true,
+          toggleActions: 'play none none reverse'
         } 
-      },
-      { 
-        ref: headingRefs.current[6], 
-        fromVars: { opacity: 0 }, 
-        toVars: { opacity: 1, duration: 1, 
-        scrollTrigger: { trigger: scrollWatcherRef.current[3], start: '-10% top' } 
+      } 
+    },
+    { 
+      ref: headingRefs.current[4], 
+      fromVars: { }, 
+      toVars: { 
+        opacity: 0,
+        duration: 0.5,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '60% top',
+          toggleActions: 'play none none reverse'
+        }
+      } 
+    },
+    {
+      ref: imgRefs.current[1],
+      fromVars: { },
+      toVars: {  
+        clipPath: "inset(0% 0% 100% 0%)" ,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1],
+          start: '70% top',
+          end: '80% top',
+          scrub: true,
+          toggleActions: 'play none none reverse'
         } 
+      }
+    },
+    { 
+      ref: foliageRefs.current[1], 
+      fromVars: { }, 
+      toVars: { 
+        clipPath: "inset(0% 0% 100% 0%)" ,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '70% top',
+          end: '80% top',
+          scrub: true,
+          toggleActions: 'play none none reverse'
+        } 
+      } 
+    },
+    {
+      ref: imgRefs.current[2],
+      fromVars: { 
+        clipPath: "inset(100% 0% 0% 0%)"
       },
-      ...temp,
-      {
-        ref: bgRefs.current,
-        fromVars: {clipPath: (index) => initalClipPaths[index]},
-        toVars: { clipPath: (index) => finalClipPaths[index], duration: 0.25, stagger: 0.1, 
-          scrollTrigger: { trigger: scrollWatcherRef.current[4],start: 'top top',end: 'center top',toggleActions: 'play reverse play none'}
+      toVars: {  
+        clipPath: "inset(0% 0% 0% 0%)" ,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1],
+          start: '70% top',
+          end: '80% top',
+          scrub: true,
+          toggleActions: 'play none none reverse'
+        } 
+      }
+    },
+    { 
+      ref: headingRefs.current[5], 
+      fromVars: { 
+        clipPath: "inset(100% 0% 0% 0%)"
+      }, 
+      toVars: { 
+        clipPath: "inset(0% 0% 0% 0%)",
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[1], 
+          start: '70% top',
+          end: '80% top',
+          scrub: true,
+          toggleActions: 'play none none reverse'
+        }
+      } 
+    },
+    { 
+      ref: headingRefs.current[6], 
+      fromVars: { 
+        opacity: 0
+      }, 
+      toVars: { 
+        opacity: 1,
+        duration: 0.5,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[2], 
+          start: '-10% top',
+        }
+      } 
+    },
+    { 
+      ref: mapRef.current, 
+      fromVars: { 
+        height: '0' 
+      }, 
+      toVars: { 
+        height: '100%',
+        duration: 0.5, 
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[2],
+          start: '-10% top'
+        } 
+      } 
+    },
+    { 
+      ref: headingRefs.current[7], 
+      fromVars: { 
+        opacity: 0
+      }, 
+      toVars: { 
+        opacity: 1,
+        duration: 0.5,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[3], 
+          start: '-20% top',
+        }
+      } 
+    },
+    { 
+      ref: swiperOverlayRef.current, 
+      fromVars: {
+        opacity: 1
+      }, 
+      toVars: { 
+        opacity: 0,
+        zIndex: -10,
+        duration: 0.5,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[3],
+          start: '-10% top',
+        } 
+      } 
+    },
+    { 
+      ref: headingRefs.current[8], 
+      fromVars: { 
+        opacity: 0
+      }, 
+      toVars: { 
+        opacity: 1,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[4], 
+          start: '-20% top',
+        }
+      } 
+    },
+
+    ...landmarksAnim,
+
+    {
+      ref: buttonRefs.current,
+      fromVars: {
+        opacity: 0
+      },
+      toVars: {
+        opacity: 1,
+        duration: 0.25,
+        scrollTrigger: {
+          trigger: buttonRefs.current,
+          start: 'top center',
         }
       }
-    ];
+    },
+    {
+      ref: bgRefs.current,
+      fromVars: {
+        clipPath: (index) => isMobile ? initalMobileClipPaths[index] : initalDesktopClipPaths[index]
+      },
+      toVars: {
+        clipPath: (index) => isMobile ? finalMobileClipPaths[index] : finalDesktopClipPaths[index],
+          duration: 0.25,
+        stagger: 0.1, 
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[5],
+          start: 'top top',
+          end: 'center top',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    }
+  ];
 };

@@ -1,7 +1,8 @@
 import { useRef } from 'react';
 import BaseComponent from './BaseComponent';
+import { NodeViewProps } from '@tiptap/react';
 
-const ImageComponent = (props) => {
+const ImageComponent = (props: NodeViewProps) => {
   const { node } = props;
   const imgRef = useRef<HTMLImageElement | null>(null);
 

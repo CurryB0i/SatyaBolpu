@@ -4,7 +4,9 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
   ],
-  "noUnusedLocals": false,
+  "compilerOptions": {
+    "noUnusedLocals": false,
+  },
   "noUnusedParameters": false,
   "skipLibCheck": true,
   "noImplicitAny": false

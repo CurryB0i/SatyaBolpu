@@ -1,31 +1,10 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
-
-export type CultureDetailsType = {
-  name: string;
-  descriptiveName: string;
-  description: string;
-  coverImages: string[] | File[] | number[];
-  galleryImages: string[] | File[] | number[];
-};
-
-export type CultureState = {
-  details: CultureDetailsType | null;
-  content: string; 
-};
+import { CultureAction, CultureContextType, CultureState } from "../types/globals";
 
 export const initialCultureState: CultureState = {
   details: null,
   content: ''
 };
-
-type CultureAction = 
-  | { type: 'SAVE_CULTURE_DETAILS', payload: { details: CultureDetailsType }  }
-  | { type: 'CLEAR_CULTURE_DETAILS' }
-  | { type: 'SAVE_EDITOR_CONTENT', payload: { content: string } }
-  | { type: 'CLEAR_EDITOR_CONTENT' }
-  | { type: 'CLEAR_CULTURE' };
-
-export type CultureDispatch = React.Dispatch<CultureAction>;
 
 const CultureReducer = (state: CultureState,action: CultureAction): CultureState => {
   switch(action.type) {
@@ -74,11 +53,6 @@ const CultureReducer = (state: CultureState,action: CultureAction): CultureState
 
   }
 }
-
-type CultureContextType = {
-  state: CultureState;
-  dispatch: CultureDispatch;
-};
 
 const CultureContext = createContext<CultureContextType>({
   state: initialCultureState,

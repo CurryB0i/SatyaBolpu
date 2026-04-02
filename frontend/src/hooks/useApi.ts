@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, useRef } from "react";
+import { BASE_URL } from "../App";
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -88,7 +89,7 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
                     ...(mergedOptions.headers || {})
                 };
             }
-            const res = await fetch(`http://192.168.1.33:3000/api${endpoint}`, requestOptions);
+            const res = await fetch(`${BASE_URL}${endpoint}`, requestOptions);
             
             if (!res.ok) {
               let errorMessage = `HTTP ${res.status}: ${res.statusText}`;

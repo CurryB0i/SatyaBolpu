@@ -1,10 +1,6 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 import LoadingPage from "../components/LoadingPage";
-
-interface LoadingContextType {
-  isLoading: boolean;
-  setLoading: (loading: boolean) => void;
-}
+import { LoadingContextType } from "../types/globals";
 
 const LoadingContext = createContext<LoadingContextType>({
   isLoading: false,

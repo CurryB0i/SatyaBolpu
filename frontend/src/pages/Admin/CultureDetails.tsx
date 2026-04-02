@@ -1,14 +1,15 @@
 import { ChangeEvent, FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
-import Title from "../components/Title";
-import { CultureDetailsType, useCulture } from "../context/CultureContext";
-import { useAuth } from "../context/AuthContext";
+import Title from "../../components/Title";
+import { useCulture } from "../../context/CultureContext";
+import { useAuth } from "../../context/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
-import { getFile, saveFile } from "../utils/FileStore";
+import { getFile, saveFile } from "../../utils/FileStore";
 import { FaEdit, FaUpload } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-import Button from "../components/Button";
+import Button from "../../components/Button";
 import { toast } from "react-toastify";
-import useApi from "../hooks/useApi";
+import useApi from "../../hooks/useApi";
+import { CultureDetailsType, ICulture } from "../../types/globals";
 
 type FormErrorType = {
   name: string;
@@ -54,18 +55,23 @@ const CultureDetails = () => {
     const loadFiles = async () => {
       const { coverImages, galleryImages, ...remainingCultureState } = cultureState.details!;
       
-      if(coverImages && galleryImages) {
-        const coverImagesFileObjs = (
+      let coverImagesFileObjs: File[] = [];
+      let galleryImagesFileObjs: File[] = [];
+      if(coverImages.length > 0) {
+        coverImagesFileObjs = (
           await Promise.all(
             coverImages.map((coverImage) => getFile({ entity: "culture", type: "details" },Number(coverImage)))
           )
         ).filter((file): file is File => file !== null);
+      }
 
-      const galleryImagesFileObjs = (
-        await Promise.all(
-          galleryImages.map((galleryImage) => getFile({ entity: "culture", type: "details" },Number(galleryImage)))
-        )
-      ).filter((file): file is File => file !== null);
+      if(galleryImages.length > 0) {
+        galleryImagesFileObjs = (
+          await Promise.all(
+            galleryImages.map((galleryImage) => getFile({ entity: "culture", type: "details" },Number(galleryImage)))
+          )
+        ).filter((file): file is File => file !== null);
+      }
 
       setFormData({
         coverImages: coverImagesFileObjs,
@@ -74,7 +80,6 @@ const CultureDetails = () => {
       });
 
       setSubmitted(true);
-      }
     };
 
     loadFiles();
@@ -88,7 +93,7 @@ const CultureDetails = () => {
 
   useEffect(() => {
     if(culturesApi.data) {
-      setExistingCultures(culturesApi.data.cultures.map(c => c.name.toLowerCase()));
+      setExistingCultures(culturesApi.data.cultures.map((c: ICulture) => c.name.toLowerCase()));
     }
   },[culturesApi.data]);
 
@@ -211,21 +216,16 @@ const CultureDetails = () => {
       return 
     }
 
-    const cultureFormData = new FormData();
-    cultureFormData.append('name',formData.name);
-    cultureFormData.append('descriptiveName',formData.descriptiveName);
-    cultureFormData.append('description',formData.description);
-
-  const coverImagesIdbKeys = (
-    await Promise.all(
-      formData.coverImages.map(async (coverImage) => {
-        if (coverImage instanceof File) {
-          return await saveFile({ entity: "culture", type: "details" },coverImage);
-        }
-        return null;
-      })
-    )
-  ).filter((key): key is number => key !== null);
+    const coverImagesIdbKeys = (
+      await Promise.all(
+        formData.coverImages.map(async (coverImage) => {
+          if (coverImage instanceof File) {
+            return await saveFile({ entity: "culture", type: "details" },coverImage);
+          }
+          return null;
+        })
+      )
+    ).filter((key): key is number => key !== null);
 
     const galleryImagesIdbKeys = (
       await Promise.all(
@@ -261,7 +261,7 @@ const CultureDetails = () => {
 
   const handleNext = () => {
     if(submitted) {
-      navigate('/create/new-culture/editor')
+      navigate('/create/culture/editor')
     } else {
       toast.error("You need to submit the form first!");
     }
@@ -278,7 +278,7 @@ const CultureDetails = () => {
       </div>
 
       <form 
-        className="flex w-1/2 flex-col gap-10 items-center justify-center mx-auto my-20"
+        className="flex w-3/4 md:w-1/2 flex-col gap-10 items-center justify-center mx-auto my-20"
         onSubmit={handleFormSubmit}
       >
         <div className="flex flex-col w-full gap-3">
@@ -286,7 +286,7 @@ const CultureDetails = () => {
             Name
           </label>
           <input 
-            className={`text-black font-semibold p-2 disabled:bg-gray-400`} 
+            className={`text-black font-semibold p-2 bg-white disabled:bg-gray-400`} 
             type="text" 
             id="name" 
             disabled={submitted}
@@ -302,7 +302,7 @@ const CultureDetails = () => {
             Descriptive Name
           </label>
           <input 
-            className={`text-black font-semibold p-2 disabled:bg-gray-400`}
+            className={`text-black bg-white font-semibold p-2 disabled:bg-gray-400`}
             disabled={submitted}
             type="text" 
             id="descriptiveName" 
@@ -318,7 +318,7 @@ const CultureDetails = () => {
             Description
           </label>
           <textarea
-            className={`text-black font-semibold p-2 disabled:bg-gray-400 resize-none`} 
+            className={`text-black bg-white font-semibold p-2 disabled:bg-gray-400 resize-none`} 
             rows={1}
             disabled={submitted}
             id="description" 
@@ -362,10 +362,13 @@ const CultureDetails = () => {
                   <img 
                     className="w-full aspect-square object-cover object-center" 
                     src={URL.createObjectURL(coverImage)} alt="cover-image" />
-                  <MdCancel 
-                    className="absolute bg-black rounded-full text-[1.5rem] top-2 right-2 cursor-pointer hover:text-primary"
-                    onClick={() => handleRemoveImage('coverImages',index)}
-                  />
+                  {
+                    submitted &&
+                      <MdCancel 
+                        className="absolute bg-black rounded-full text-[1.5rem] top-2 right-2 cursor-pointer hover:text-primary"
+                        onClick={() => handleRemoveImage('coverImages',index)}
+                      />
+                  }
                 </div>
                 )
               }
@@ -406,10 +409,13 @@ const CultureDetails = () => {
                   <img 
                     className="w-full aspect-square object-cover object-center" 
                     src={URL.createObjectURL(galleryImage)} alt={`gallery-${index}`} />
-                  <MdCancel 
-                    className="absolute bg-black rounded-full top-2 right-2 cursor-pointer hover:text-primary"
-                    onClick={() => handleRemoveImage('galleryImages',index)}
-                  />
+                  {
+                    submitted &&
+                      <MdCancel 
+                        className="absolute bg-black rounded-full top-2 right-2 cursor-pointer hover:text-primary"
+                        onClick={() => handleRemoveImage('galleryImages',index)}
+                      />
+                  }
                 </div>
                 )
               }
@@ -442,12 +448,12 @@ const CultureDetails = () => {
 
       <div className="flex w-screen items-center justify-between p-10">
         <div 
-          className={` text-[1.75rem] hover:text-primary text-white cursor-pointer`}
-          onClick={() => navigate('/create/new-culture')}>
+          className={`text-[1.2rem] sm:text-[1.75rem] hover:text-primary text-white cursor-pointer`}
+          onClick={() => navigate('/create/culture')}>
             {`< Progress`}
         </div>
         <div 
-          className={` text-[1.75rem]
+          className={`text-[1.2rem] sm:text-[1.75rem]
           ${submitted ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
           onClick={handleNext}>
             {`Editor >`}

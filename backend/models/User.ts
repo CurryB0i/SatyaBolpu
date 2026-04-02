@@ -1,14 +1,16 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import { IPhone, IUser } from "../types/globals.js";
 
-export interface IUser extends Document {
-  name: string;
-  uname: string;
-  email: string;
-  phone: number;
-  role: 'user' | 'admin';
-  verified: boolean;
-  password: string;
-}
+const phoneSchema = new Schema<IPhone>({
+  dialCode: {
+    type: Number,
+    required: true
+  },
+  number: {
+    type: Number,
+    required: true
+  }
+});
 
 const userSchema = new Schema<IUser>({
   name: {
@@ -26,8 +28,7 @@ const userSchema = new Schema<IUser>({
     required: true,
   },
   phone: {
-    type: Number,
-    required: true,
+    type: phoneSchema
   },
   role: {
     type: String,

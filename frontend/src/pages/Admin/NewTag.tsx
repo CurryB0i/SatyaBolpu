@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import Title from "../components/Title";
-import Button from "../components/Button";
-import useApi from "../hooks/useApi";
+import Title from "../../components/Title";
+import Button from "../../components/Button";
+import useApi from "../../hooks/useApi";
 import { toast } from "react-toastify";
 
 const NewTag = () => {
@@ -60,14 +60,14 @@ const NewTag = () => {
       </div>
 
       <form 
-        className="w-1/2 flex flex-col gap-5 items-center justify-center mx-auto"
+        className="w-3/4 md:w-1/2 lg:w-1/3 flex flex-col gap-5 items-center justify-center mx-auto"
         onSubmit={handleTagSubmit}>
         <div className="flex flex-col items-center justify-center w-full gap-3">
           <label className="text-primary font-semibold text-[1.5rem]" htmlFor="tag">
             Tag
           </label>
           <input 
-            className={`text-black w-2/3 font-semibold p-2`} 
+            className={`w-full text-black bg-white font-semibold p-2`} 
             type="text" 
             id="tag" 
             name="tag" 

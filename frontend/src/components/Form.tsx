@@ -1,41 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FaTimes, FaUpload } from 'react-icons/fa';
 import Button from './Button';
-
-export interface FormFieldOption {
-  value: string | number;
-  label: string;
-}
-
-export interface FormField {
-  name: string;
-  label: string;
-  type: 'text' | 'email' | 'password' | 'textarea' | 'select' | 'file' | 'url' | 'number' | 'radio';
-  placeholder?: string;
-  required?: boolean;
-  options?: FormFieldOption[];
-  accept?: string;
-  rows?: number;
-  min?: number;
-  max?: number;
-  validation?: (value: any) => string | null;
-  disabled?: boolean;
-}
-
-export interface FormProps {
-  onClose: () => void;
-  title: string;
-  fields: FormField[];
-  formData: Record<string, any>;
-  onChange: (name: string, value: any) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  error?: string;
-  loading?: boolean;
-  submitText?: string;
-  loadingText?: string;
-  className?: string;
-  formClassName?: string;
-}
+import { FormField, FormProps } from '../types/globals';
 
 const Form: React.FC<FormProps> = ({
   onClose,
@@ -207,6 +173,7 @@ const Form: React.FC<FormProps> = ({
             <label className="text-primary font-semibold text-[1.5rem]">
               {field.label} {field.required && <span className="text-red-500">*</span>}
             </label>
+            
             <div className="flex gap-10">
               {field.options?.map((option) => (
                 <label key={option.value} className="text-white text-[1.5rem] cursor-pointer" htmlFor={`${field.name}-${option.value}`}>

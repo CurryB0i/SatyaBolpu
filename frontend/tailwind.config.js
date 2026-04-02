@@ -1,24 +1,7 @@
-/** @type {import('tailwindcss').Config} */
-const plugin = require('tailwindcss/plugin');
+import plugin from "tailwindcss/plugin";
 
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-  safelist : [
-    'h-[1500vh]'
-  ],
-  theme: {
-    extend: {
-      colors: {
-        primary: "#E88138",
-      },
-      fontFamily: {
-        cursive: '"Charm", serif',
-      },
-      height: {
-        '1500vh' : '1500vh'
-      }
-    },
-  },
+
   plugins: [
     plugin(function ({ matchUtilities, theme }) {
       matchUtilities(

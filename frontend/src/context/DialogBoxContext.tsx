@@ -1,19 +1,6 @@
 import { createContext, ReactNode, useContext, useRef, useState } from "react";
 import DialogBox from "../components/DialogBox";
-import { FormProps } from "../components/Form";
-
-export type DialogBoxOptions = {
-    title: string;
-    descr?: string;
-    severity?: "irreversible" | "risky" | "default";
-    form?: FormProps;
-    onConfirm?: () => void;
-    onCancel?: () => void;
-}
-
-type DialogBoxContextType = {
-    popup: (options: DialogBoxOptions) => void;
-}
+import { DialogBoxContextType, DialogBoxOptions } from "../types/globals";
 
 const DialogBoxContext = createContext<DialogBoxContextType>({
   popup: () => {
@@ -36,7 +23,7 @@ export const DialogBoxProvider = ({children} : {children: ReactNode}) => {
             close();
         }
     });
-    const closeTimeout = useRef<NodeJS.Timeout>();
+    const closeTimeout = useRef<number | null>(null);
     const close = () => {
       if (closeTimeout.current) clearTimeout(closeTimeout.current);
       closeTimeout.current = setTimeout(() => setOptions(null), 500);

@@ -1,22 +1,41 @@
 import { Navigate, useParams } from "react-router-dom";
 import useApi from "../hooks/useApi";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { CultureType } from "./Explore";
 import { useLoading } from "../context/LoadingContext";
 import gsap from "gsap";
 import Button from "../components/Button";
-import { BASE_URL } from "../App";
+import { CultureDetailsType } from "../types/globals";
 
 const Culture = () => {
   const { culture } = useParams();
-  const { isLoading, setLoading } = useLoading();
+  const { setLoading } = useLoading();
   const culturesApi = useApi(`/cultures/${culture}`);
-  const [cultureData, setCultureData] = useState<CultureType | null>(null);
+  const [cultureData, setCultureData] = useState<CultureDetailsType | null>(null);
+  const [imgCount, setImgCount] = useState<number>(1);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const sectionsRef = useRef<HTMLDivElement[]>([]);
   const imagesRef = useRef<HTMLDivElement[]>([]);
-  
+
+  useEffect(() => {
+    console.log(imgCount)
+    if(imagesRef.current.length <= 0) return;
+
+    let imgWidth = 0;
+    const ww = window.innerWidth;
+    if(ww < 768) {
+      imgWidth = ww*0.2;
+    } else if (ww < 1280) {
+      imgWidth = ww*0.15;
+    } else {
+      imgWidth = ww*0.1;
+    }
+
+    const c = (window.innerWidth/imgWidth) * (window.innerHeight/imgWidth);
+    console.log(imgWidth, c)
+    setImgCount(Math.round(c));
+  }, [cultureData, window.innerWidth, window.innerHeight]);
+
   useEffect(() => {
     setLoading(culturesApi.loading);
   }, [culturesApi.loading]);
@@ -161,16 +180,16 @@ const Culture = () => {
           </div>
 
           <div 
-            className="w-screen h-[100vh] text-primary relative font-black overflow-hidden"
+            className="w-screen h-screen text-primary relative font-black overflow-hidden"
             ref={(el) => { if(el) sectionsRef.current[1] = el }}
           >
             <div 
-              className="w-screen h-[100vh] text-center absolute left-0 flex gap-5 flex-col justify-center items-center"
+              className="w-screen h-screen text-center absolute left-0 flex gap-5 flex-col justify-center items-center"
             >
               <div className="text-[2rem]">
                 The Deity Worship
               </div>
-              <div className="w-[95%] md:w-1/2 text-justify text-sm md:text-[1.25rem]">
+              <div className="w-[95%] md:w-[80%] px-2 md:px-0 lg:w-3/4 2xl:w-3/5 text-justify text-sm md:text-[1.25rem]">
                 Daivaradhane / Bhootaradhane is practiced in the coastal region of Karnataka which is still practiced today.
                 Daivardhane refers to the worship of the divine power of guardians and ancestors by conducting rituals and ceremonies.
                 In Tulunadu, Daivardhane is a non-Vedic ritual. Early Tuluvas were not practitioners of the Vedas and Shastra,
@@ -192,20 +211,20 @@ const Culture = () => {
           </div>
 
           <div 
-            className="w-screen h-[100vh] text-primary relative font-black overflow-hidden"
+            className="w-screen h-screen text-primary relative font-black overflow-hidden"
             ref={(el) => { if(el) sectionsRef.current[2] = el }}
           >
             <div 
-              className="w-screen h-[100vh] text-center absolute left-0 flex flex-wrap gap-1 
+              className="w-screen h-screen text-center absolute left-0 flex flex-wrap
                 justify-evenly items-center"
             >
               {
-                Array(100).fill(`${BASE_URL}${cultureData.coverImages[0]}`).map((item,index) => (
+                Array(imgCount).fill(`/assets/Explore/daivaradhane.jpg`).map((item,index) => (
                   <div 
                     key={index} 
-                    className="w-[10%] scale-0 opacity-50" 
+                    className="w-[20%] md:w-[15%] xl:w-[10%] scale-0 opacity-50" 
                     ref={(el) => {if(el) imagesRef.current[index] = el }}>
-                    <img className="w-full h-full" src={item} alt="" />
+                    <img className="w-full aspect-square object-cover object-center" src={item} alt="" />
                   </div>
                 ))
               }

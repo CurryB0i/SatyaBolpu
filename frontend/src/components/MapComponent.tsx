@@ -1,25 +1,10 @@
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import React, { useEffect, useState, ReactNode } from "react";
-import { LatLngBoundsExpression, LatLngExpression, Map } from "leaflet";
+import React, { useEffect, useState } from "react";
+import { Map } from "leaflet";
 import { IoLocationSharp } from "react-icons/io5";
 import { FaLock, FaLockOpen, FaPlus, FaMinus } from "react-icons/fa";
-
-interface MapComponentProps {
-  children?: ReactNode;
-  className?: string;
-  geoJsonData?: { [key: string]: any };
-  onMapReady?: (map: Map) => void;
-  zoom?: number;
-  onZoomChange?: (zoom: number) => void;
-  lock?: boolean;
-  onLockChange?: (locked: boolean) => void;
-  showControls?: boolean;
-  center?: LatLngExpression;
-  maxBounds?: LatLngBoundsExpression;
-  minZoom?: number;
-  initialZoom?: number;
-}
+import { MapComponentProps } from "../types/globals";
 
 const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(({
   children,
@@ -92,7 +77,7 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
         }
       };
 
-      const handleKeyUp = (e: KeyboardEvent) => {
+      const handleKeyUp = () => {
         if (map) {
           map.scrollWheelZoom.disable();
         }

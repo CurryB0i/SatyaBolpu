@@ -1,14 +1,5 @@
-import mongoose, { Document, Schema } from 'mongoose';
-
-export interface ICulture extends Document {
-  name: string;
-  descriptiveName: string;
-  description: string;
-  coverImages: string[];
-  galleryImages: string[];
-  content: string;
-  posts: number;
-}
+import mongoose, { Schema } from 'mongoose';
+import { ICulture } from '../types/globals.js';
 
 const cultureSchema = new Schema<ICulture>({
   name: {

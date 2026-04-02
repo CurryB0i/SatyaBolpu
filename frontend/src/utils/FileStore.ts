@@ -1,31 +1,27 @@
 import { openDB, IDBPDatabase } from "idb";
+import { Entity, ImageType } from "../types/globals";
 
 const DB_NAME = "mediaDB";
 const DB_VERSION = 1;
 
-type Entity = "culture" | "post";
-type ImageType = "editor" | "details";
-
 const getStoreName = (entity: Entity, type?: ImageType): string[] => {
-  if(type) {
-    return [`${entity}_${type}Images`];
-  } else {
-    return [`${entity}_detailsImages`,`${entity}_editorImages`]
-  }
+  return [`${entity}_${type}Images`];
 }
 
 export const initIDB = async () => {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db: IDBPDatabase) {
-      const entities: Entity[] = ["culture", "post"];
-      const types: ImageType[] = ["editor", "details"];
+      const stores = [
+        "post_detailsImages",
+        "culture_detailsImages",
+        "post_editorImages",
+        "culture_editorImages",
+        "event_detailsImages"
+      ];
 
-      for (const entity of entities) {
-        for (const type of types) {
-          const store = getStoreName(entity, type)[0];
-          if (!db.objectStoreNames.contains(store)) {
-            db.createObjectStore(store, { autoIncrement: true });
-          }
+      for (const store of stores) {
+        if (!db.objectStoreNames.contains(store)) {
+          db.createObjectStore(store, { autoIncrement: true });
         }
       }
     },

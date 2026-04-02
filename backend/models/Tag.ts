@@ -1,10 +1,7 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import { ITag } from "../types/globals.js";
 
-export interface ITag extends Document {
-  tag: string;
-}
-
-const tagSchema = new Schema({
+const tagSchema = new Schema<ITag>({
   tag: {
     type: String,
     required: true,

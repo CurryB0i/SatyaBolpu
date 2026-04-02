@@ -1,25 +1,7 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import { ILocation, IPost } from "../types/globals.js";
 
-interface ILocation {
-  district: string;
-  taluk: string;
-  village: string;
-  lat: number;
-  lng: number;
-}
-
-export interface IPost extends Document {
-  mainTitle: string;
-  shortTitle: string;
-  culture: "daivaradhane" | "nagaradhane" | "yakshagana" | "kambala";
-  description: string;
-  tags: Schema.Types.ObjectId[];
-  image: string;
-  content: string;
-  location?: ILocation;
-}
-
-const locationSchema = new Schema<ILocation>({
+export const locationSchema = new Schema<ILocation>({
   district: { type: String, required: true },
   taluk: { type: String },
   village: { type: String, required: true },
@@ -37,8 +19,8 @@ const postSchema = new Schema<IPost>({
     required: true
   },
   culture: {
-    type: String,
-    enum: ["daivaradhane", "nagaradhane", "yakshagana", "kambala"],
+    type: Schema.Types.ObjectId,
+    ref: 'Culture',
     required: true
   },
   description: {
@@ -55,7 +37,7 @@ const postSchema = new Schema<IPost>({
       message: 'At least one tag required'
     }
   },
-image: {
+  image: {
     type: String,
     required: true
   },
@@ -64,8 +46,7 @@ image: {
     required: true
   },
   location: {
-    type: locationSchema,
-    required: false
+    type: locationSchema
   }
 }, { timestamps: true });
 

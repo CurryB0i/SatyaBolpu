@@ -4,6 +4,7 @@ import uploadRoutes from './routes/UploadRoutes.js';
 import postRoutes from './routes/PostRoutes.js';
 import tagRoutes from './routes/TagRoutes.js';
 import cultureRoutes from './routes/CultureRoutes.js';
+import eventRoutes from './routes/EventRoutes.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './utils/db.js';
@@ -24,14 +25,26 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.use((req, res, next) => {
+  console.log("-----");
+  console.log("Time:", new Date().toISOString());
+  console.log("Method:", req.method);
+  console.log("URL:", req.url);
+  console.log("IP:", req.ip);
+  console.log("Body:", req.body);
+  next();
+});
+
+app.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
 connectDB()
 
-app.get('/api', (req, res) => res.send('Hello World!'));
+app.get('/api', (req, res) =>  res.send('Hello World!'));
 app.use('/api/auth',authRoutes);
 app.use('/api/upload',uploadRoutes);
 app.use('/api/posts',postRoutes);
 app.use('/api/cultures',cultureRoutes);
+app.use('/api/events',eventRoutes);
 app.use('/api/tags',tagRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

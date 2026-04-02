@@ -1,9 +1,10 @@
 import { Request, Response} from 'express';
-import { Culture, ICulture } from '../models/Cuture.js';
+import { Culture } from '../models/Culture.js';
+import { ICulture } from '../types/globals.js';
 
 export const getCultures = async (req: Request, res: Response) => {
   try {
-    const cultures: ICulture[] | null = await Culture.find();
+    const cultures = await Culture.find();
     if(!cultures) {
       return res.status(404).json({ msg: 'No cultures found.' });
     }
@@ -18,7 +19,7 @@ export const getCultures = async (req: Request, res: Response) => {
 export const getCulture = async (req: Request, res: Response) => {
   try {
     let { name } = req.params;
-    name = name.charAt(0).toUpperCase() + name.slice(1,name.length);
+    name = name.charAt(0).toUpperCase() + name.slice(1);
     const culture: ICulture | null = await Culture.findOne({ name });
     if(!culture) {
       return res.status(404).json({ msg: 'No culture found.' });
@@ -38,7 +39,8 @@ export const uploadCulture = async (req: Request, res: Response) => {
       return res.status(400).json({ msg: 'Missing required field.' });
     }
 
-    const doesExist = await Culture.findOne({ name: details.name });
+    const cultureName = details.name.charAt(0).toUpperCase() + details.name.slice(1);
+    const doesExist = await Culture.findOne({ name: cultureName });
     if(doesExist) {
       return res.status(400).json({ msg: `Culture '${details.name}' already exists.` })
     }

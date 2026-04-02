@@ -1,18 +1,19 @@
 import { ChangeEvent, FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
-import Title from "../components/Title";
+import Title from "../../components/Title";
 import { MdCancel } from "react-icons/md";
 import { FaUpload } from "react-icons/fa6";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
-import Button from "../components/Button";
+import Button from "../../components/Button";
 import { toast } from "react-toastify";
-import { PostDetailsType, usePost } from "../context/PostContext";
+import { usePost } from "../../context/PostContext";
 import { FaEdit } from "react-icons/fa";
-import { clearStore, getFile, saveFile } from "../utils/FileStore";
-import useApi from "../hooks/useApi";
-import { useLoading } from "../context/LoadingContext";
+import { clearStore, getFile, saveFile } from "../../utils/FileStore";
+import useApi from "../../hooks/useApi";
+import { useLoading } from "../../context/LoadingContext";
+import { ICulture, PostDetailsType } from "../../types/globals";
 
-type formErrorType = {
+type FormErrorType = {
   mainTitle: string;
   shortTitle: string;
   culture: string;
@@ -24,14 +25,14 @@ type formErrorType = {
 const initialFormData: PostDetailsType = {
   mainTitle: '',
   shortTitle: '',
-  culture: '',
+  culture: null,
   description: '',
   tags: [],
   locationSpecific: false,
   image: null
 }
 
-const initialFormErrors: formErrorType = {
+const initialFormErrors: FormErrorType = {
   mainTitle: '',
   shortTitle: '',
   culture: '',
@@ -45,17 +46,19 @@ const PostDetails = () => {
   const { state: postState, dispatch: postDispatch } = usePost();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<PostDetailsType>(initialFormData);
-  const [errors,setErrors] = useState<formErrorType>(initialFormErrors);
+  const [errors, setErrors] = useState<FormErrorType>(initialFormErrors);
   const descrRef = useRef<HTMLTextAreaElement | null>(null);
   const tagRef = useRef<HTMLInputElement | null>(null);
   const [showTags, setShowTags] = useState<boolean>(false);
   const [allowedTags,setAllowedTags] = useState<string[]>([]);
+  const [cultures, setCultures] = useState<string[]>([]);
   const [activeTag,setActiveTag] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState<number>(0); 
   const [visibleStart, setVisibleStart] = useState<number>(0);
   const pageSize = 10;
   const [submitted, setSubmitted] = useState(false);
   const tagsApi = useApi('/tags');
+  const culturesApi = useApi('/cultures');
   const { setLoading } = useLoading();
 
   useEffect(() => {
@@ -67,6 +70,15 @@ const PostDetails = () => {
       setAllowedTags(tagsApi.data.tags.sort())
   },[tagsApi.data])
 
+  useEffect(() => {
+    setLoading(culturesApi.loading);
+  },[culturesApi.loading]);
+
+  useEffect(() => {
+    if(culturesApi.data && culturesApi.data.cultures)
+      setCultures(culturesApi.data.cultures.map((c: ICulture) => c.name).sort());
+  },[culturesApi.data])
+
   useLayoutEffect(() => {
     if(!postState.details)
       return
@@ -76,7 +88,7 @@ const PostDetails = () => {
       setFormData({...postDetailsWithoutImage, image: await getFile({ entity: "post", type: "details" }, Number(image))});
     })();
     setSubmitted(true);
-  },[])
+  },[postState])
 
   useEffect(() => {
     const handleClickOutside = (e: Event) => {
@@ -221,12 +233,16 @@ const PostDetails = () => {
       newErrors.shortTitle = "Short Title should be at least 3 characters long!";
     }
 
-    if(!formData.culture.trim()) {
+    if(!formData.culture) {
       newErrors.culture = "Please choose a culture!";
     }
 
     if(!formData.description.trim()) {
       newErrors.description = "Description cannot be empty!";
+    }
+
+    if(formData.description && formData.description.split(' ').length < 10) {
+      newErrors.description = "Description should be atleast 10 words long.";
     }
     
     if(formData.tags.length < 1) {
@@ -241,15 +257,6 @@ const PostDetails = () => {
     const hasErrors = Object.values(newErrors).some(err => err !== '');
     if(hasErrors)
       return 
-
-    const postFormData = new FormData();
-    postFormData.append("mainTitle", formData.mainTitle);
-    postFormData.append("shortTitle", formData.shortTitle);
-    postFormData.append("culture", formData.culture);
-    postFormData.append("description", formData.description);
-    postFormData.append("locationSpecific", formData.locationSpecific ? "true" : "false");
-    formData.tags.forEach(tag => postFormData.append("tags", tag));
-    if (formData.image instanceof File) postFormData.append("file", formData.image);
 
     const { image, ...formDataWithoutImage } = formData;
     if(image && image instanceof File) {
@@ -267,7 +274,7 @@ const PostDetails = () => {
 
   const handleNext = () => {
     if(submitted) {
-      navigate('/create/new-post/editor')
+      navigate('/create/post/editor')
     } else {
       toast.error("You need to submit the form first!");
     }
@@ -296,7 +303,7 @@ const PostDetails = () => {
             Main Title
           </label>
           <input 
-            className={`text-black font-semibold p-2 disabled:bg-gray-400`} 
+            className={`text-black font-semibold bg-white p-2 disabled:bg-gray-400`} 
             disabled={submitted}
             type="text" 
             id="mainTitle" 
@@ -311,7 +318,7 @@ const PostDetails = () => {
             Short Title
           </label>
           <input 
-            className={`text-black font-semibold p-2 disabled:bg-gray-400`} 
+            className={`text-black font-semibold bg-white p-2 disabled:bg-gray-400`} 
             disabled={submitted}
             type="text" 
             id="shortTitle" 
@@ -329,15 +336,16 @@ const PostDetails = () => {
             disabled={submitted}
             name="culture" 
             id="culture"
-            className="p-2 cursor-pointer disabled:bg-gray-300"
-            value={formData.culture}
+            className="p-2 cursor-pointer disabled:bg-gray-300 bg-white"
+            value={formData.culture ?? ''}
             onChange={handleFormChange}
           >
             <option value="" hidden className="text-white">-- Choose a culture --</option>
-            <option value="daivaradhane">Daivaradhane</option>
-            <option value="nagaradhane">Nagaradhane</option>
-            <option value="yakshagana">Yakshagana</option>
-            <option value="kambala">Kambala</option>
+            {
+              cultures.map((culture, idx) => (
+                <option key={idx} value={culture.toLowerCase()}>{culture}</option>
+              ))
+            }
           </select>
           {errors.culture && <p className="text-red-500">{errors.culture}</p>}
         </div>
@@ -347,7 +355,7 @@ const PostDetails = () => {
             Description
           </label>
           <textarea
-            className="text-black font-semibold p-2 overflow-hidden resize-none disabled:bg-gray-400"
+            className="text-black font-semibold p-2 bg-white overflow-hidden resize-none disabled:bg-gray-400"
             rows={1}
             disabled={submitted}
             id="description"
@@ -380,7 +388,7 @@ const PostDetails = () => {
             }
             </div>
             <input
-              className="text-black w-1/2 font-semibold p-2 overflow-hidden resize-none disabled:bg-gray-400"
+              className="text-black w-1/2 font-semibold bg-white p-2 overflow-hidden resize-none disabled:bg-gray-400"
               type="text"
               id="tags"
               disabled={submitted}
@@ -509,7 +517,7 @@ const PostDetails = () => {
       <div className="flex w-screen items-center justify-between p-10">
         <div 
           className={`text-[1.2rem] sm:text-[1.75rem] hover:text-primary text-white cursor-pointer`}
-          onClick={() => navigate('/create/new-post')}>
+          onClick={() => navigate('/create/post')}>
             {`< Progress`}
         </div>
         <div 
