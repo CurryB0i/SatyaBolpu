@@ -75,7 +75,7 @@ const Navbar = () => {
     if(!state.token) {
         return (
           <div
-            className={`flex rounded-3xl overflow-hidden cursor-pointer text-sm sm:text-xl
+            className={`flex rounded-3xl overflow-hidden cursor-pointer text-sm p-0.75 sm:p-0 sm:text-xl
               ${pathname !== '/' ? 'bg-white text-black' : 'bg-black text-white'}
               ${extraClass}`}
           >

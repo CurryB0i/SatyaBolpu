@@ -6,6 +6,19 @@ import { IoLocationSharp } from "react-icons/io5";
 import { FaLock, FaLockOpen, FaPlus, FaMinus } from "react-icons/fa";
 import { MapComponentProps } from "../types/globals";
 
+import L from 'leaflet';
+
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
 const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(({
   children,
   className = "w-full h-full relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden",
@@ -117,7 +130,7 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
     <div className={className} ref={ref}>
       {showControls && (
         <div className="z-10 absolute flex flex-col justify-center items-center gap-2 left-7 top-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
-          <div className={`flex h-[3.5rem] flex-col gap-2 bg-slate-100 rounded-md ${lock ? 'pointer-events-none' : ''}`}>
+          <div className={`flex h-14 flex-col gap-2 bg-slate-100 rounded-md ${lock ? 'pointer-events-none' : ''}`}>
             <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(1)}>
               <FaPlus className={`${lock ? 'text-slate-300' : 'text-black'}`} />
             </div>
