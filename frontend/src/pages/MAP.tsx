@@ -14,6 +14,22 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { Location } from "../types/globals";
 import { Mode } from "../types/enums";
 import { useEvent } from "../context/EventContext";
+import { FaChevronCircleLeft } from "react-icons/fa";
+
+//this is beacuse icons dont load in prod, some bs idk
+import L from 'leaflet';
+
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+//the below line is because someone caches something
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 type coordinatesErrorType = {
   lat: string;
@@ -43,6 +59,7 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
   const [askForCoordinates,setAskForCoordinates] = useState<boolean>(false);
   const [coordinateErrors,setCoordinateErrors] = useState<coordinatesErrorType>({lat: '', lng: ''});
   const [location,setMapDetails] = useState<Location>(initialLocation);
+  const [showMenu, setShowMenu] = useState<boolean>(true);
   const { setLoading } = useLoading();
   const navigate = useNavigate();
 
@@ -94,14 +111,14 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
   }, []);
 
   useEffect(() => {
-    if (mapRef.current) {
+    if (mapRef.current && map) {
       if (fullScreen && document.fullscreenElement !== mapRef.current) {
         mapRef.current.requestFullscreen();
       } else if (!fullScreen && document.fullscreenElement === mapRef.current) {
         document.exitFullscreen();
       }
     }
-  }, [fullScreen]);
+  }, [fullScreen, mapRef, map]);
 
   const handleMapReady = (mapInstance: Map) => {
     setMap(mapInstance);
@@ -441,7 +458,11 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
   }
 
   return (
-    <div className="w-screen h-screen relative" ref={mapRef}>
+    <div 
+      className="w-screen h-screen relative"
+      ref={mapRef}
+      data-lenis-prevent
+    >
       <style>
         {`
           .leaflet-interactive:focus{
@@ -547,17 +568,25 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
 
       {
         activeVillage && (
-          <div className="absolute bottom-0 bg-black m-5 p-5 text-white z-[1000]
-             flex flex-col gap-2 rounded-2xl">
-            <MdCancel 
-              className="absolute top-3 right-3 cursor-pointer hover:fill-primary"
-              onClick={handleVillageExit}/>
-            <h1>Village : {activeVillage.properties?.VILLAGE}</h1>
-            <h2>District: {activeVillage.properties?.DISTRICT}</h2>
-            <h2>Taluk: {activeVillage.properties?.TALUK}</h2>
-            <p className="italic">lorem ipsum</p>
-            <p>No of covered locations: {0}</p>
-            <Button content="View More" className="mx-auto" onClick={handleView}/>
+          <div className="absolute bottom-0 bg-black m-5 p-5 text-white z-1000
+             flex flex-col gap-2 rounded-2xl transition-all"
+            style={{
+              translate: showMenu ? '0 0 ' : '-100% 0'
+            }}   
+          >
+            <FaChevronCircleLeft
+              size={'20px'}
+              style={{
+                rotate: showMenu ? '0deg' : '180deg'
+              }}
+              className="absolute top-1/2 -translate-y-1/2 -right-2 cursor-pointer hover:fill-primary
+              transition-all"
+              onClick={() => setShowMenu(!showMenu)}/>
+            <p className="text-center text-primary font-bold">{activeVillage.properties?.VILLAGE}</p>
+            <p className="text-sm">District: {activeVillage.properties?.DISTRICT}</p>
+            <p className="text-sm">Taluk: {activeVillage.properties?.TALUK || 'Unknown'}</p>
+            <p className="text-sm">No of covered locations: {0}</p>
+            <Button content="View More" className="mx-auto text-sm" onClick={handleView}/>
           </div>
         )
       }
@@ -573,6 +602,7 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
         showControls={true}
         minZoom={9}
         initialZoom={9}
+        gestureHandling={!fullScreen}
       >
         {zoom >= 11 && (
           zoom > 15 ? 
@@ -587,19 +617,21 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
             />
         }
         {
-          editMode === Mode.EVENT ?
+          editMode && (
+            editMode === Mode.EVENT ? 
             <div 
-              className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-[400] bottom-0 m-5
+              className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
                cursor-pointer hover:text-primary"
               onClick={() => navigate('/create/event/details')}>
               {`< Event Details`}
             </div> :
             <div 
-              className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-[400] bottom-0 m-5
+              className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
                cursor-pointer hover:text-primary"
               onClick={() => navigate('/create/post/editor')}>
               {`< Editor`}
             </div>
+          )
         }
       </MapComponent>
 

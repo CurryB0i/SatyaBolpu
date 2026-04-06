@@ -30,17 +30,17 @@ const finalMobileClipPaths = [
 ];
 
 export const buildAnimationProps = (
-  scrollWatcherRef: React.MutableRefObject<HTMLDivElement[]>,
-  headingRefs: React.MutableRefObject<HTMLDivElement[]>,
-  foliageRefs: React.MutableRefObject<HTMLImageElement[]>,
+  scrollWatcherRef: React.RefObject<HTMLDivElement[]>,
+  headingRefs: React.RefObject<HTMLDivElement[]>,
+  foliageRefs: React.RefObject<HTMLImageElement[]>,
   overlayRef: React.RefObject<HTMLDivElement | null>,
-  imgRefs: React.MutableRefObject<HTMLImageElement[]>,
-  svgRef: React.MutableRefObject<SVGSVGElement | null>,
-  mapRef: React.MutableRefObject<HTMLDivElement | null>,
-  swiperOverlayRef: React.MutableRefObject<HTMLDivElement | null>,
-  bgRefs: React.MutableRefObject<HTMLDivElement[]>,
-  landmarkRefs: React.MutableRefObject<HTMLDivElement[]>,
-  buttonRefs: React.MutableRefObject<HTMLButtonElement[]>,
+  imgRefs: React.RefObject<HTMLImageElement[]>,
+  svgRef: React.RefObject<SVGSVGElement | null>,
+  mapRef: React.RefObject<HTMLDivElement | null>,
+  swiperOverlayRef: React.RefObject<HTMLDivElement | null>,
+  bgRefs: React.RefObject<HTMLDivElement[]>,
+  landmarkRefs: React.RefObject<HTMLDivElement[]>,
+  buttonRefs: React.RefObject<HTMLButtonElement[]>,
   isMobile: boolean
 ): PropsType[] => {
 
@@ -182,8 +182,8 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 100% 0% 0%)",
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1],
-          start: '30% top',
-          end: '50% top',
+          start: '20% top',
+          end: '40% top',
           scrub: true,
           toggleActions: 'play none none reverse'
         } 
@@ -198,8 +198,8 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 100% 0% 0%)",
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '30% top',
-          end: '50% top',
+          start: '20% top',
+          end: '40% top',
           scrub: true,
           toggleActions: 'play none none reverse'
         }
@@ -214,8 +214,8 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 0% 0%)" ,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1],
-          start: '30% top',
-          end: '50% top',
+          start: '20% top',
+          end: '40% top',
           scrub: true,
           toggleActions: 'play none none reverse'
         } 
@@ -230,8 +230,8 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 0% 0%)" ,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '30% top',
-          end: '50% top',
+          start: '20% top',
+          end: '40% top',
           scrub: true,
           toggleActions: 'play none none reverse'
         }
@@ -245,7 +245,7 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '55% top',
+          start: '45% top',
           toggleActions: 'play none none reverse'
         } 
       } 
@@ -257,8 +257,8 @@ export const buildAnimationProps = (
         backgroundColor: 'rgba(0,0,0,0.5)', 
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1],
-          start: '60% top',
-          end: '70% top',
+          start: '50% top',
+          end: '60% top',
           scrub: true, 
           toggleActions: 'play none none reverse' 
         } 
@@ -271,8 +271,8 @@ export const buildAnimationProps = (
         scale: 1,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '60% top',
-          end: '70% top',
+          start: '50% top',
+          end: '60% top',
           scrub: true,
           toggleActions: 'play none none reverse'
         } 
@@ -286,7 +286,7 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '60% top',
+          start: '50% top',
           toggleActions: 'play none none reverse'
         }
       } 
@@ -298,7 +298,7 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 100% 0%)" ,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1],
-          start: '70% top',
+          start: '60% top',
           end: '80% top',
           scrub: true,
           toggleActions: 'play none none reverse'
@@ -312,7 +312,7 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 100% 0%)" ,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '70% top',
+          start: '60% top',
           end: '80% top',
           scrub: true,
           toggleActions: 'play none none reverse'
@@ -328,7 +328,7 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 0% 0%)" ,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1],
-          start: '70% top',
+          start: '60% top',
           end: '80% top',
           scrub: true,
           toggleActions: 'play none none reverse'
@@ -344,7 +344,7 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 0% 0%)",
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '70% top',
+          start: '60% top',
           end: '80% top',
           scrub: true,
           toggleActions: 'play none none reverse'

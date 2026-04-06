@@ -83,6 +83,8 @@ export type MapComponentProps = {
   maxBounds?: LatLngBoundsExpression;
   minZoom?: number;
   initialZoom?: number;
+  ref?: React.RefObject<HTMLDivElement | null>;
+  gestureHandling?: boolean;
 };
 
 export type User = {

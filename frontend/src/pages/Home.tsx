@@ -161,7 +161,7 @@ const Home = () => {
           </div>
         </div>
 
-        <div className='relative w-full h-[600vh]'>
+        <div className='relative w-full h-[700vh]'>
           <div className='absolute w-full h-full top-0 left-0'
             style={{
               clip: 'rect(0, auto, auto, 0)',
@@ -278,7 +278,7 @@ const Home = () => {
             Cultures And Traditions
           </div>
           
-          <div className='w-screen h-1/2 sm:h-screen relative flex'>
+          <div className='w-screen h-1/2 md:h-screen relative flex'>
             <div className='absolute top-0 w-screen h-full z-10 bg-black' ref={swiperOverlayRef}></div>
 
             <Swiper
@@ -310,23 +310,23 @@ const Home = () => {
                                     lg:justify-around items-center md:p-5 md:gap-0'>
                       <div className='lg:w-1/3 md:w-5/6 w-full lg:h-full h-1/2 flex flex-col items-center justify-center md:gap-5'>
                         <h1 className='text-[2rem] lg:text-[3rem]/[3rem] text-primary'>{slide.title}</h1>
-                        <p className='text-justify hidden sm:block text-white text-[1rem] p-10'>{slide.descr}</p>
+                        <p className='text-justify hidden md:block text-white text-[1rem] p-10'>{slide.descr}</p>
                         <Button content="Explore" onClick={()=>navigate(`/explore/${slide.title}`)}/>
                       </div>
                       <div 
-                        className='flex lg:flex-col items-center justify-center lg:w-2/5 lg:h-full w-screen h-[50%]
+                        className='flex lg:flex-col items-center justify-center lg:w-2/5 lg:h-full w-screen h-1/2
                         cursor-pointer' 
                         onMouseEnter={() => setHovering(true)}
                         onClick={() => setHovering(!isHovering)}
                         onMouseLeave={() => setHovering(false)}
                       >
-                        <img loading='lazy' className={`relative lg:w-3/5 w-[60%] aspect-video object-cover z-0 transition-all duration-300 
+                        <img loading='lazy' className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 transition-all duration-300 
                                         ${isHovering ? 'lg:translate-y-0 lg:-rotate-12 lg:translate-x-0 -translate-y-28 -rotate-20 translate-x-[90%] ' 
                                                       : '-translate-y-5 rotate-10 translate-x-[90%] lg:translate-x-0 lg:translate-24 lg:rotate-12'}`}
                               src={slide.images[0]} alt={slide.title} />
-                        <img loading='lazy' className={`relative lg:w-3/5 w-[60%] aspect-video object-cover z-10 `} 
+                        <img loading='lazy' className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-10 `} 
                             src={slide.images[1]} alt={slide.title} />
-                        <img loading='lazy' className={`relative lg:w-3/5 w-[60%] aspect-video object-cover z-0 transition-all duration-300
+                        <img loading='lazy' className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 transition-all duration-300
                                       ${isHovering ? 'lg:translate-y-0 lg:-rotate-12 translate-y-28 -translate-x-[90%] -rotate-20 lg:translate-x-0' 
                                                     : 'translate-y-5 rotate-10 -translate-x-[90%] lg:translate-x-0 lg:-translate-y-24 lg:rotate-12'}`}
                             src={slide.images[2]} alt={slide.title} />
@@ -352,42 +352,6 @@ const Home = () => {
             </Swiper>
           </div>
         
-        </div>
-
-        <div className='w-full md:my-52 flex flex-col items-center justify-center gap-10 md:gap-32' 
-             ref={(el) => {if(el) scrollWatcherRef.current[4] = el }}>
-          <div className='text-primary text-center text-[2.5rem] sm:text-[4rem] md:text-[4rem] xl:text-[5rem]' 
-               ref={(el) => {if(el) headingRefs.current[8] = el} }>
-            Cutural Landmarks
-          </div>
-          <div className='flex flex-col w-full p-2 md:p-10 items-center justify-center gap-5 md:gap-16'>
-          {
-            landmarksData && landmarksData.map((data,index) => (
-              <div key={index} className='w-full flex border-4 border-primary'
-                ref={(el) => { if(el) landmarksRefs.current[index] = el; }}
-                style={{
-                  flexDirection: index%2 === 0 ? 'row' : 'row-reverse'
-                }}
-              >
-                <img 
-                  className='w-1/3 aspect-square object-cover'
-                  src={data.image} 
-                  alt={data.title}
-                />
-                <div className='w-2/3 flex flex-col items-center justify-center'>
-                  <p className='text-primary text-[1.2rem] md:text-[2rem]'>{data.title}</p>
-                  <p className='text-white'>{data.descr}</p>
-                </div>
-              </div>
-            ))
-          }
-          <Button 
-            className='text-center md:text-[1.25rem] p-3' 
-            content='View All'
-            index={0}
-            ref={buttonRefs}
-          />
-          </div>
         </div>
 
         <div className='cta relative w-screen h-[350vh] mt-[50vh] mb-[50vh]' ref={(el) => {if(el) scrollWatcherRef.current[5] = el}}>

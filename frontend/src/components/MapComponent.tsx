@@ -1,17 +1,20 @@
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import React, { useEffect, useState } from "react";
-import { Map } from "leaflet";
+import React, { useEffect, useRef, useState } from "react";
 import { IoLocationSharp } from "react-icons/io5";
 import { FaLock, FaLockOpen, FaPlus, FaMinus } from "react-icons/fa";
 import { MapComponentProps } from "../types/globals";
+import { GestureHandling } from "leaflet-gesture-handling";
+import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css";
 
+//this is beacuse icons dont load in prod, some bs idk
 import L from 'leaflet';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
+//the below line is because someone caches something
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -19,7 +22,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(({
+const MapComponent = ({
   children,
   className = "w-full h-full relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden",
   geoJsonData,
@@ -36,9 +39,12 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
   ],
   minZoom = 9,
   initialZoom = 9,
-}, ref) => {
+  ref,
+  gestureHandling = true
+} : MapComponentProps) => {
   
-  const [map, setMap] = useState<Map | null>(null);
+  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
   const [internalLock, setInternalLock] = useState<boolean>(false);
   const [internalZoom, setInternalZoom] = useState<number>(initialZoom);
 
@@ -63,13 +69,26 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
 
   const MapEvents = () => {
     const map = useMap();
+    mapRef.current = map;
 
     useEffect(() => {
-      setMap(map);
-      if (onMapReady) {
-        onMapReady(map);
+      setMapInstance(map);
+      if (onMapReady) onMapReady(map);
+
+      if (!map.hasEventListeners('gestureHandling')) {
+        map.addHandler('gestureHandling', GestureHandling);
       }
-    }, [map]);
+
+      if (gestureHandling) {
+        (map as any).gestureHandling?.enable();
+      } else {
+        (map as any).gestureHandling?.disable();
+      }
+
+      return () => {
+        (map as any).gestureHandling?.disable();
+      };
+    }, [map, gestureHandling]);
 
     useEffect(() => {
       if (map) {
@@ -82,11 +101,13 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
     }, [map]);
 
     useEffect(() => {
+      if(!map) return;
+
       const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.ctrlKey && map) {
+        if (e.ctrlKey) {
           map.scrollWheelZoom.enable();
         } else {
-          map?.scrollWheelZoom.disable();
+          map.scrollWheelZoom.disable();
         }
       };
 
@@ -124,10 +145,10 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
     return null;
   };
 
-  const handleZoomChange = (delta: number) => map && map.setZoom(zoom + delta);
+  const handleZoomChange = (delta: number) => mapInstance && mapInstance.setZoom(zoom + delta);
 
   return (
-    <div className={className} ref={ref}>
+    <div data-lenis-prevent className={className} ref={ref}>
       {showControls && (
         <div className="z-10 absolute flex flex-col justify-center items-center gap-2 left-7 top-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
           <div className={`flex h-14 flex-col gap-2 bg-slate-100 rounded-md ${lock ? 'pointer-events-none' : ''}`}>
@@ -141,7 +162,7 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
           <IoLocationSharp
             className={`${lock ? 'text-slate-300 pointer-events-none' : 'text-red-500'}`}
             size={32}
-            onClick={() => map && map.setView(center, initialZoom, { animate: true })}
+            onClick={() => mapInstance && mapInstance.setView(center, initialZoom, { animate: true })}
           />
 
           {lock ? (
@@ -169,6 +190,7 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
         scrollWheelZoom={false}
         zoomControl={false}
         doubleClickZoom={false}
+        touchZoom={true}
       >
         <MapEvents />
 
@@ -188,6 +210,6 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
       </MapContainer>
     </div>
   );
-});
+};
 
 export default MapComponent;
