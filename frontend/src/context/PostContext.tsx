@@ -10,57 +10,67 @@ const initialPostState : PostState = {
 const PostReducer = (state: PostState, action: PostAction) : PostState => {
   switch(action.type) {
     case 'SAVE_POST_DETAILS': {
-      localStorage.setItem('postDetails',JSON.stringify(action.payload.details));
-      return {
+      const newPost: PostState = {
         ...state,
         details: action.payload.details
-      }
+      };
+      localStorage.setItem('post', JSON.stringify(newPost));
+      return newPost;
     }
 
     case 'CLEAR_POST_DETAILS': {
-      localStorage.removeItem('postDetails');
-      return {
+      const newPost: PostState = {
         ...state,
         details: null
       };
+      localStorage.setItem('post', JSON.stringify(newPost));
+      return newPost;
     }
 
     case 'SAVE_EDITOR_CONTENT': {
-      localStorage.setItem('postContent',action.payload.content); 
-      return {
+      const newPost: PostState = {
         ...state,
         content: action.payload.content
-      }
+      };
+      localStorage.setItem('post', JSON.stringify(newPost)); 
+      return newPost;
     }
 
     case 'CLEAR_EDITOR_CONTENT': {
-      localStorage.removeItem('postContent');  
-      return {
+      const newPost: PostState = {
         ...state,
         content: ''
-      }
+      };
+      localStorage.setItem('post', JSON.stringify(newPost));  
+      return newPost;
     }
 
     case 'SAVE_LOCATION': {
-      localStorage.setItem('postLocation',JSON.stringify(action.payload.location));
-      return {
+      const newPost: PostState = {
         ...state,
         location: action.payload.location
-      }
+      };
+      localStorage.setItem('post',JSON.stringify(newPost));
+      return newPost;
+    
     }
 
     case 'CLEAR_LOCATION': {
-      localStorage.removeItem('postLocation');
-      return {
+      const newPost: PostState = {
         ...state,
         location: null
-      }
+      };
+      localStorage.setItem('post', JSON.stringify(newPost));
+      return newPost;
+    }
+
+    case 'SAVE_POST': {
+      localStorage.setItem('post', JSON.stringify(action.payload.post));
+      return action.payload.post;
     }
 
     case 'CLEAR_POST': {
-      localStorage.removeItem('postDetails');
-      localStorage.removeItem('postContent');  
-      localStorage.removeItem('postLocation');
+      localStorage.removeItem('post');
       return {
         ...initialPostState
       }
@@ -81,23 +91,10 @@ const PostContext = createContext<PostContextType>({
 export const PostProvider = ({ children } : { children: ReactNode }) => {
 
   const init = (): PostState => {
-    const details = (() => {
-      const raw = localStorage.getItem('postDetails');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return Object.keys(parsed).length > 0 ? parsed : null;
-    })();
-
-    const content = localStorage.getItem('postContent') || '';
-
-    const location = (() => {
-      const raw = localStorage.getItem('postLocation');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return Object.keys(parsed).length > 0 ? parsed : null;
-    })();
-
-    return { details, content, location };
+    const raw = localStorage.getItem('post');
+    if (!raw) return initialPostState;
+    const parsed = JSON.parse(raw);
+    return Object.keys(parsed).length > 0 ? parsed : initialPostState;
   };
 
   const [state, dispatch] = useReducer(PostReducer, initialPostState, init);

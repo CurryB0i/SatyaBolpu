@@ -13,7 +13,7 @@ import Dashboard from './pages/Dashboard'
 import NewPost from './pages/Admin/NewPost'
 import PostDetails from './pages/Admin/PostDetails'
 import Culture from './pages/Culture'
-import Lenis from "@studio-freight/lenis";
+import Lenis from "lenis";
 import { useLayoutEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/all'
@@ -34,19 +34,16 @@ gsap.registerPlugin(ScrollTrigger);
 function App() {
   useLayoutEffect(() => {
     const lenis = new Lenis({
+      autoRaf: true,
+      allowNestedScroll: true,
       smoothWheel: true,
-      lerp: 0.1,
+      duration: 0.8,
       wheelMultiplier: 1,
       syncTouch: true,
       syncTouchLerp: 0.1,
-      touchMultiplier: 1,
+      touchMultiplier: 1.5
     });
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
 
     lenis.on("scroll", ScrollTrigger.update);
 

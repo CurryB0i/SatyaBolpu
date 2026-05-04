@@ -5,12 +5,14 @@ import { JSX, useEffect, useState } from "react";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import RotatingCard, { RotatingSkeletonCard } from "./RotatingCard";
 import { CollapsingCard, CollapsingSkeletonCard } from "./CollapsingCard";
+import useApi from "../hooks/useApi";
+import { toast } from "react-toastify";
 
 const Pagination = ({ 
   pageNo, 
   totalPages, 
   handleArrows, 
-  handlePageChange, 
+  handlePageChange,
 } : {
   pageNo: string,
   totalPages: number,
@@ -67,9 +69,8 @@ const PaginationSkeleton = () => (
       <div className="flex items-center gap-2">
         <div className="w-12 h-12 bg-gray-700 animate-pulse rounded-2xl"></div>
         <span className="text-white text-lg">
-          /
+          / ...
         </span>
-        <div className="w-12 h-12 bg-gray-700 animate-pulse rounded-2xl"></div>
       </div>
       <GrFormNext 
         className="bg-gray-700 w-12 p-2 rounded-2xl cursor-pointer transition-colors"
@@ -78,10 +79,28 @@ const PaginationSkeleton = () => (
   </div>
 );
 
-const CardList = ({ cardsDataList, cardType, loading, orientation, cardsPerPage } : CardListProps) => {
-  const [paginationLoading, setPaginationLoading] = useState<boolean>(false);
-  const [pageNo,setPageNo] = useState<string>('1');
-  const [pageData,setPageData] = useState<CardProps[]>([]);
+const CardList = ({ cardType, apiEndpoint, orientation, cardsPerPage, handleEdit } : CardListProps) => {
+  const [data, setData] = useState<CardProps[]>([]);
+  const [pageNo, setPageNo] = useState<string>('1');
+  let api = useApi(`/${apiEndpoint}?page=${pageNo}&limit=${cardsPerPage}`);
+
+  useEffect(() => {
+    api.refetch();
+  }, [pageNo]);
+
+  useEffect(() => {
+    if(api.data) {
+      setData(
+        api.data[apiEndpoint].map(
+          (d: Omit<CardProps, 'handleEdit'>) => ({ handleEdit: handleEdit, ...d })
+        )
+      );
+    }
+
+    if(api.error) {
+      toast.error(api.error);
+    }
+  }, [api.data, api.error])
 
   let Card: (props: CardProps) => JSX.Element;
   let SkeletonCard: () => JSX.Element;
@@ -108,23 +127,7 @@ const CardList = ({ cardsDataList, cardType, loading, orientation, cardsPerPage 
       break;
   }
 
-
-  useEffect(() => {
-    if(cardsDataList.length <= 0) return; 
-
-    setPaginationLoading(true);
-    const page = parseInt(pageNo);
-    if(!page) return;
-
-    setPageData([]);
-    setTimeout(() => {
-      setPageData(cardsDataList.slice((page - 1)*cardsPerPage, page*cardsPerPage));
-      setPaginationLoading(false);
-    },1000);
-   
-  },[pageNo, cardsDataList])
-
-  const totalPages = Math.ceil(cardsDataList.length / cardsPerPage);
+  const totalPages = api.data?.totalPages;
 
   const handlePageChange = (val: string) => {
     const num = parseInt(val);
@@ -145,14 +148,14 @@ const CardList = ({ cardsDataList, cardType, loading, orientation, cardsPerPage 
       if(num - 1 < 1) return setPageNo('1');
       setPageNo((num - 1).toString());
     } else {
-      if(num + 1 > cardsDataList.length) return setPageNo(totalPages.toString());
+      if(num + 1 > data.length) return setPageNo(totalPages.toString());
       setPageNo((num + 1).toString())
     }
   }
 
   return (
     <div>
-      { !loading && cardsDataList.length > 0 ?
+      { !api.loading && data.length > 0 ?
         <Pagination  
           pageNo={pageNo}
           totalPages={totalPages}
@@ -169,18 +172,18 @@ const CardList = ({ cardsDataList, cardType, loading, orientation, cardsPerPage 
         }}
       >
       {
-        loading || paginationLoading ? (
+        api.loading ? (
           Array.from({ length: cardsPerPage }).map((_, id) => (
               <SkeletonCard key={id} />
             ))
           ) : (
-          pageData.map((cardProps, id) => (
+            data.map((cardProps, id) => (
             <Card {...cardProps} key={id}/>
           ))
       )}
       </div>
 
-      { !loading && cardsDataList.length > 0 ?
+      { !api.loading && data.length > 0 ?
         <Pagination  
           pageNo={pageNo}
           totalPages={totalPages}

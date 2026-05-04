@@ -23,15 +23,15 @@ export type CardProps = {
   title: string;
   images: string[];
   description: string;
-  route: string;
+  handleEdit: (id: string) => void
 };
 
 export type CardListProps = {
   cardType: CardType,
-  cardsDataList: CardProps[],
-  loading: boolean,
+  apiEndpoint: string,
   orientation: 'row' | 'column',
-  cardsPerPage: number
+  cardsPerPage: number,
+  handleEdit: (id: string) => void
 };
 
 export type FormFieldOption = {
@@ -196,6 +196,7 @@ export type PostAction =
   | { type: 'CLEAR_EDITOR_CONTENT' }
   | { type: 'SAVE_LOCATION', payload: { location: Location } }
   | { type: 'CLEAR_LOCATION' }
+  | { type: 'SAVE_POST', payload: { post: PostState } }
   | { type: 'CLEAR_POST' };
 
 export type PostDispatch = React.Dispatch<PostAction>;
@@ -296,3 +297,24 @@ export interface IEvent {
   docs: string[];
   location: ILocation
 };
+
+export type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+export interface ApiOptions extends Omit<RequestInit, 'body' | 'method'> {
+  method?: Method;
+  endpoint?: string;
+  body?: any;
+  auto?: boolean;
+}
+
+export interface ApiState<T> {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+  refetch: (opts?: Partial<ApiOptions>) => Promise<T | null>;
+  post: (body: any, opts?: Partial<ApiOptions>) => Promise<T | null>;
+  put: (body: any, opts?: Partial<ApiOptions>) => Promise<T | null>;
+  patch: (body: any, opts?: Partial<ApiOptions>) => Promise<T | null>;
+  del: (opts?: Partial<ApiOptions>) => Promise<T | null>;
+  reset: () => void;
+}

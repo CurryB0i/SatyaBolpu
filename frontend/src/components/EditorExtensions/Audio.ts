@@ -70,7 +70,7 @@ export const Audio = Node.create({
         tag: 'div.file',
         priority: 100,
         getAttrs: (element: HTMLElement) => {
-          const img = element.querySelector('audio[data-idbkey]');
+          const img = element.querySelector('audio');
           if (!img) return false;
           
           const captionEl = element.querySelector('p.caption');
@@ -78,7 +78,7 @@ export const Audio = Node.create({
           return {
             src: img.getAttribute('src'),
             type: img.getAttribute('type'),
-            idbKey: img.getAttribute('data-idbkey'),
+            idbKey: img.getAttribute('data-idbkey') || null,
             width: element.getAttribute('width') || element.style.width || '300px',
             caption: captionEl?.textContent || '',
           };

@@ -148,7 +148,7 @@ const MapComponent = ({
   const handleZoomChange = (delta: number) => mapInstance && mapInstance.setZoom(zoom + delta);
 
   return (
-    <div data-lenis-prevent className={className} ref={ref}>
+    <div className={className} ref={ref}>
       {showControls && (
         <div className="z-10 absolute flex flex-col justify-center items-center gap-2 left-7 top-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
           <div className={`flex h-14 flex-col gap-2 bg-slate-100 rounded-md ${lock ? 'pointer-events-none' : ''}`}>
@@ -182,7 +182,7 @@ const MapComponent = ({
       )}
 
       <MapContainer
-        className="z-0 relative w-full h-full"
+        className="z-0 relative w-full h-full text-center"
         center={center}
         zoom={initialZoom}
         maxBounds={maxBounds}

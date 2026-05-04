@@ -106,7 +106,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
         setEditorState('submitted');
       })()
     }
-  },[cultureState.content, getIndexedFiles, mode, postState.content]);
+  },[cultureState.content, postState.content]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -472,7 +472,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
               <div className="flex items-center justify-center w-4/5 sm:w-2/3 lg:w-1/2 mx-auto">
                 <div className="w-1/2 border-t-2 border-solid border-primary"></div>
                 <span className="mx-4 text-xl text-primary font-bold">ॐ</span>
-                <div className="w-1/2 border-t-2 border-solid border-primary flex-grow"></div>
+                <div className="w-1/2 border-t-2 border-solid border-primary grow"></div>
               </div>
             </div>
 
@@ -614,7 +614,7 @@ const Editor = ({ mode } : { mode: Mode }) => {
             <Title title={title}/>
             
             <div 
-              className='text-white text-[1.5rem] w-[90%] p-5 break-words whitespace-pre-wrap'
+              className='text-white text-[1.5rem] w-[90%] p-5 wrap-break-word whitespace-pre-wrap'
               dangerouslySetInnerHTML={{
                   __html : decodeHtml(body)
               }}      

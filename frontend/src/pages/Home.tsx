@@ -124,10 +124,8 @@ const Home = () => {
           >
             <div 
               className="fixed inset-0 w-full h-full flex items-center justify-center bg-no-repeat bg-cover bg-center -z-10
-                before:content-[''] before:fixed before:inset-0 before:opacity-60 before:z-10 before:bg-black"
-              style={{
-                backgroundImage: "url('/assets/Home/hero/bg2.webp')",
-              }}
+                before:content-[''] before:fixed before:inset-0 before:opacity-60 before:z-10 before:bg-black
+                bg-[url('/assets/Home/hero/bg2.webp')]"
               ref={(el) => { if(el) scrollWatcherRef.current[0] = el; }}
             >
             </div>
@@ -307,29 +305,45 @@ const Home = () => {
                 swiperData && swiperData.map((slide,index) => (
                   <SwiperSlide key={index}>
                     <div className='z-0 relative w-full h-full lg:flex-row flex flex-col-reverse justify-center
-                                    lg:justify-around items-center md:p-5 md:gap-0'>
-                      <div className='lg:w-1/3 md:w-5/6 w-full lg:h-full h-1/2 flex flex-col items-center justify-center md:gap-5'>
+                                    lg:justify-around items-center md:p-5'>
+                      <div className='lg:w-1/3 md:w-5/6 w-full lg:h-full h-1/3 flex flex-col items-center md:justify-center md:gap-5'>
                         <h1 className='text-[2rem] lg:text-[3rem]/[3rem] text-primary'>{slide.title}</h1>
                         <p className='text-justify hidden md:block text-white text-[1rem] p-10'>{slide.descr}</p>
                         <Button content="Explore" onClick={()=>navigate(`/explore/${slide.title}`)}/>
                       </div>
                       <div 
-                        className='flex lg:flex-col items-center justify-center lg:w-2/5 lg:h-full w-screen h-1/2
+                        className='flex lg:flex-col items-center justify-center lg:w-2/5 lg:h-full w-screen h-[65%]
                         cursor-pointer' 
                         onMouseEnter={() => setHovering(true)}
                         onClick={() => setHovering(!isHovering)}
                         onMouseLeave={() => setHovering(false)}
                       >
-                        <img loading='lazy' className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 transition-all duration-300 
-                                        ${isHovering ? 'lg:translate-y-0 lg:-rotate-12 lg:translate-x-0 -translate-y-28 -rotate-20 translate-x-[90%] ' 
-                                                      : '-translate-y-5 rotate-10 translate-x-[90%] lg:translate-x-0 lg:translate-24 lg:rotate-12'}`}
-                              src={slide.images[0]} alt={slide.title} />
-                        <img loading='lazy' className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-10 `} 
-                            src={slide.images[1]} alt={slide.title} />
-                        <img loading='lazy' className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 transition-all duration-300
-                                      ${isHovering ? 'lg:translate-y-0 lg:-rotate-12 translate-y-28 -translate-x-[90%] -rotate-20 lg:translate-x-0' 
-                                                    : 'translate-y-5 rotate-10 -translate-x-[90%] lg:translate-x-0 lg:-translate-y-24 lg:rotate-12'}`}
-                            src={slide.images[2]} alt={slide.title} />
+                        <img 
+                          loading='lazy' 
+                          className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 transition-all duration-300 
+                            ${isHovering ? 
+                              'lg:translate-y-0 lg:-rotate-12 lg:translate-x-0 -translate-y-28 -rotate-20 translate-x-[90%] ' : 
+                              '-translate-y-5 rotate-10 translate-x-[90%] lg:translate-x-0 lg:translate-24 lg:rotate-12'
+                            }`}
+                          src={slide.images[0]} 
+                          alt={slide.title} 
+                        />
+                        <img 
+                          loading='lazy' 
+                          className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-10 `} 
+                          src={slide.images[1]} 
+                          alt={slide.title} 
+                        />
+                        <img 
+                          loading='lazy' 
+                          className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 transition-all duration-300
+                            ${isHovering ? 
+                              'lg:translate-y-0 lg:-rotate-12 translate-y-28 -translate-x-[90%] -rotate-20 lg:translate-x-0' : 
+                              'translate-y-5 rotate-10 -translate-x-[90%] lg:translate-x-0 lg:-translate-y-24 lg:rotate-12'
+                            }`}
+                          src={slide.images[2]} 
+                          alt={slide.title} 
+                        />
                       </div>
                     </div>
                   </SwiperSlide>
@@ -337,7 +351,7 @@ const Home = () => {
               }
               </div>
 
-              <div className="flex relative bottom-13 md:bottom-16 gap-3 flex-col-reverse">
+              <div className="flex relative bottom-20 md:bottom-16 gap-3 flex-col-reverse">
                 <div className="nav w-full text-black flex items-center justify-center gap-2 text-3xl">
                   <div className='custom-nav-prev z-10 cursor-pointer rounded-[999px] bg-white hover:bg-primary'>
                     <GrFormPreviousLink />
@@ -346,36 +360,49 @@ const Home = () => {
                     <GrFormNextLink />
                   </div>
                 </div>
-                <div className="custom-pagination w-full h-auto  flex items-center justify-center gap-2">
+                <div className="custom-pagination w-full h-auto flex items-center justify-center gap-2">
                 </div>
               </div>
             </Swiper>
           </div>
         
         </div>
+          
+        <div 
+          className='w-screen'
+          ref={(el) => { if(el) scrollWatcherRef.current[4] = el }}
+        >
+          <div 
+            className='text-primary text-center text-[2.25rem]/[2.25rem] md:text-[3rem] xl:text-[5rem] '
+            ref={(el) => {if(el) headingRefs.current[7] = el }}
+          >
+            Recent Posts
+          </div>
+
+        </div>
 
         <div className='cta relative w-screen h-[350vh] mt-[50vh] mb-[50vh]' ref={(el) => {if(el) scrollWatcherRef.current[5] = el}}>
           <div className="sticky top-0 w-full h-screen">
             <div className='overlay w-full h-screen absolute top-0 bg-[rgba(0,0,0,0.5)] z-10'></div>
             <div className="w-screen h-1/4 md:w-1/4 md:h-screen top-0 left-0 absolute
-                            [background-image:url('/assets/Home/cta/daivaradhane.jpg')] bg-no-repeat
+                            bg-[url('/assets/Home/cta/daivaradhane.jpg')] bg-no-repeat
                             bg-cover bg-center transition-all duration-300" 
                  ref={(el) => {if(el) bgRefs.current[0] = el}}></div>
             <div className="w-screen h-1/4 md:w-1/2 md:h-screen top-[25%] md:top-0 md:left-[12.5%] absolute
-                            [background-image:url('/assets/Home/cta/Kambala.webp')] bg-no-repeat
+                            bg-[url('/assets/Home/cta/Kambala.webp')] bg-no-repeat
                             bg-cover bg-center transition-all duration-300"
                  ref={(el) => {if(el) bgRefs.current[1] = el}}></div>
             <div className="w-screen h-1/4 md:w-1/2 md:h-screen bottom-[25%] md:top-0 md:right-[12.5%] absolute
-                            [background-image:url('/assets/Home/cta/yakshagana.jpg')] bg-no-repeat
+                            bg-[url('/assets/Home/cta/yakshagana.jpg')] bg-no-repeat
                             bg-cover md:bg-center transition-all duration-300"
                  ref={(el) => {if(el) bgRefs.current[2] = el}}></div>
             <div className="w-screen h-1/4 md:w-1/4 md:h-screen bottom-0 right-0 absolute
-                            [background-image:url('/assets/Home/cta/nagaradhane.jpg')] bg-no-repeat
-                            bg-cover bg-center md:bg-[40%] transition-all duration-300"
+                            bg-[url('/assets/Home/cta/nagaradhane.jpg')] bg-no-repeat
+                            bg-cover bg-center md:bg-position-[40%] transition-all duration-300"
                  ref={(el) => {if(el) bgRefs.current[3] = el}}></div>
           </div>
           <div className='sticky top-0 w-full h-screen flex flex-col items-center justify-center gap-3 text-center z-20 p-5'>
-            <h1 className='text-white text-[2rem]'>
+            <h1 className='text-white text-[1.5rem] md:text-[2rem] font-semibold'>
             {
                 state.token ?
                 "Embrace The Land of Faith"

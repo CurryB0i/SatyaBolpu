@@ -60,7 +60,7 @@ const NewPost = () => {
             const formData = new FormData();
             formData.append("file", file);
             const res = await uploadApi.post(formData);
-            fileEl.setAttribute("src", `${BASE_URL}/${res.path}`);
+            fileEl.setAttribute("src", `${BASE_URL}${res.path}`);
             fileEl.removeAttribute("data-idbkey");
           }
         }

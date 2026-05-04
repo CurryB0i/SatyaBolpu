@@ -80,7 +80,7 @@ const Dashboard = () => {
 
         </div>
 
-        <div data-lenis-prevent className="w-[90%] xl:w-1/3 h-[75vh] py-10 flex flex-col gap-5 items-center 
+        <div className="w-[90%] xl:w-1/3 h-[75vh] py-10 flex flex-col gap-5 items-center 
           justify-center outline outline-white rounded-2xl">
           <h1 className="text-[2rem] font-semibold">Recent Updates</h1>
           <div className="w-4/5 p-5 h-full flex flex-col items-center gap-5 

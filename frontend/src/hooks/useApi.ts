@@ -1,25 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { BASE_URL } from "../App";
-
-type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-
-interface ApiOptions extends Omit<RequestInit, 'body' | 'method'> {
-    method?: Method;
-    body?: any;
-    auto?: boolean;
-}
-
-interface ApiState<T> {
-    data: T | null;
-    loading: boolean;
-    error: string | null;
-    refetch: (opts?: Partial<ApiOptions>) => Promise<T | null>;
-    post: (body: any, opts?: Partial<ApiOptions>) => Promise<T | null>;
-    put: (body: any, opts?: Partial<ApiOptions>) => Promise<T | null>;
-    patch: (body: any, opts?: Partial<ApiOptions>) => Promise<T | null>;
-    del: (opts?: Partial<ApiOptions>) => Promise<T | null>;
-    reset: () => void;
-}
+import { ApiOptions, ApiState, Method } from "../types/globals";
 
 const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiState<T> => {
     const [state, setState] = useState<Omit<ApiState<T>, "refetch" | "post" | "put" | "patch" | "del" | "reset">>({
@@ -89,7 +70,8 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
                     ...(mergedOptions.headers || {})
                 };
             }
-            const res = await fetch(`${BASE_URL}${endpoint}`, requestOptions);
+            const finalEndpoint = options.endpoint || endpoint;
+            const res = await fetch(`${BASE_URL}${finalEndpoint}`, requestOptions);
             
             if (!res.ok) {
               let errorMessage = `HTTP ${res.status}: ${res.statusText}`;

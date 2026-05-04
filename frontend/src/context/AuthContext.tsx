@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
+    console.log(user, token)
     return { user, token, isRefreshing: false };
   }); 
   const refreshTimeoutRef = useRef<number | null>(null);

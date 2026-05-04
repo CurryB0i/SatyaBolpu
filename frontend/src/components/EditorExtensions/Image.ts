@@ -3,6 +3,8 @@ import { Image } from '@tiptap/extension-image'
 import ImageComponent from './ImageComponent'
 
 export const ResizableImage = Image.extend({
+  group: 'block',
+  atom: true,
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -48,7 +50,7 @@ export const ResizableImage = Image.extend({
         tag: 'div.file',
         priority: 100,
         getAttrs: (element: HTMLElement) => {
-          const img = element.querySelector('img[data-idbkey]');
+          const img = element.querySelector('img');
           if (!img) return false;
           
           const captionEl = element.querySelector('p.caption');
@@ -56,7 +58,7 @@ export const ResizableImage = Image.extend({
           return {
             src: img.getAttribute('src'),
             alt: img.getAttribute('alt'),
-            idbKey: img.getAttribute('data-idbkey'),
+            idbKey: img.getAttribute('data-idbkey') || null,
             width: element.getAttribute('width') || element.style.width || '300px',
             align: element.classList.contains('mr-auto') ? 'left' : 
                    element.classList.contains('ml-auto') ? 'right' : 'center',

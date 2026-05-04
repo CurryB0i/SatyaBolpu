@@ -284,13 +284,13 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
     </>
   ), [geoJsonData]);
 
-  const handleVillageExit = () => {
-    if(map && activeVillage) {
-      setActiveVillage(null);
-      activeLayerRef.current?.setStyle(styles.default);
-      activeLayerRef.current = null;
-    }
-  }
+  // const handleVillageExit = () => {
+  //   if(map && activeVillage) {
+  //     setActiveVillage(null);
+  //     activeLayerRef.current?.setStyle(styles.default);
+  //     activeLayerRef.current = null;
+  //   }
+  // }
 
   const handleView = () => {
     if(map && activeVillage) {
@@ -461,7 +461,6 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
     <div 
       className="w-screen h-screen relative"
       ref={mapRef}
-      data-lenis-prevent
     >
       <style>
         {`

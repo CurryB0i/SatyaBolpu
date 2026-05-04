@@ -224,7 +224,7 @@ const SignUp = () => {
               {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
 
-            <div className="w-full flex flex-col gap-3" data-lenis-prevent>
+            <div className="w-full flex flex-col gap-3">
               <label htmlFor="phone">Phone (Optional):</label>
               <PhoneInput
                 country={"in"}

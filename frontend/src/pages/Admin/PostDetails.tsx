@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, SubmitEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Title from "../../components/Title";
 import { MdCancel } from "react-icons/md";
 import { FaUpload } from "react-icons/fa6";
@@ -12,6 +12,7 @@ import { clearStore, getFile, saveFile } from "../../utils/FileStore";
 import useApi from "../../hooks/useApi";
 import { useLoading } from "../../context/LoadingContext";
 import { ICulture, PostDetailsType } from "../../types/globals";
+import { BASE_URL } from "../../App";
 
 type FormErrorType = {
   mainTitle: string;
@@ -85,7 +86,12 @@ const PostDetails = () => {
     
     const {image, ...postDetailsWithoutImage} = postState.details;
     (async () => {
-      setFormData({...postDetailsWithoutImage, image: await getFile({ entity: "post", type: "details" }, Number(image))});
+      setFormData({
+        ...postDetailsWithoutImage,
+         image: typeof image === "number" ?
+                await getFile({ entity: "post", type: "details" }, Number(image)) :
+                image
+      });
     })();
     setSubmitted(true);
   },[postState])
@@ -205,7 +211,7 @@ const PostDetails = () => {
     }))
   }
 
-  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newErrors = {
       mainTitle: '',
@@ -376,7 +382,7 @@ const PostDetails = () => {
             {
               formData.tags.length > 0 && formData.tags.map((tag,index) => (
                 <div key={index} className="text-white max-w-full flex items-center justify-evenly gap-1 bg-gray-600 px-2 rounded-lg">
-                  <p className="max-w-full break-words">{tag}</p>
+                  <p className="max-w-full wrap-break-word">{tag}</p>
                   {
                     !submitted &&
                       <MdCancel 
@@ -486,11 +492,15 @@ const PostDetails = () => {
             onChange={handleFileChange}
           />
           {
-            formData.image && formData.image instanceof File &&
+            formData.image &&
               <div className="w-1/2 border-2 border-solid border-white flex">
                 <img 
                   className="w-full aspect-square object-cover object-center" 
-                  src={URL.createObjectURL(formData.image)} alt="" />
+                  src={
+                    formData.image instanceof File ?
+                    URL.createObjectURL(formData.image) : 
+                    `${BASE_URL}${formData.image}`
+                  } alt="" />
               </div>
           }
           {errors.image && <p className="text-red-500">{errors.image}</p>}
