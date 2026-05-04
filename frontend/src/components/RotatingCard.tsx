@@ -9,14 +9,14 @@ export const RotatingSkeletonCard = () => (
     </div>
 );
 
-const RotatingCard = ({ title, images, description, route }: CardProps) => {
+const RotatingCard = ({ id, title, images, description }: CardProps) => {
   const [clicked, setClicked] = useState(false);
   const navigate = useNavigate();
 
   const handleClick = () => {
-      if(route) {
-        navigate(`/${route}/${title}`)
-      }
+    if (id) {
+      navigate(`/${id}/${title}`)
+    }
   }
 
   return (

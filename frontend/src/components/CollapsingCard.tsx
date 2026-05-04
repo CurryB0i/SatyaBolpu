@@ -7,18 +7,18 @@ import Button from "./Button";
 export const CollapsingSkeletonCard = () => (
   <div className="flex flex-col w-[90%] lg:w-2/3 border border-solid border-white rounded-lg
         overflow-hidden relative">
-    <div className="w-full flex h-[25rem]">
+    <div className="w-full flex h-100">
       {
         Array(3).fill(0).map((_, i) => (
           <div key={i} className={`w-1/3 h-full ${i%2 === 0 ? 'bg-gray-500' : 'bg-gray-600'} `}></div>
         ))
       }
     </div>
-    <div className="absolute bottom-0 w-full bg-gray-700 h-[5rem]"></div>
+    <div className="absolute bottom-0 w-full bg-gray-700 h-20"></div>
   </div>
 );
 
-export const CollapsingCard = ({ title, images, route, description }: CardProps) => {
+export const CollapsingCard = ({ id, title, images, description }: CardProps) => {
   const [showMoreIdx, setShowMoreIdx] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const descriptionRef = useRef<HTMLDivElement>(null);
@@ -60,7 +60,7 @@ export const CollapsingCard = ({ title, images, route, description }: CardProps)
       ref={cardRef}
     >
       <div 
-        className="w-full flex h-[25rem]"
+        className="w-full flex h-100"
         style={{
           opacity: showMoreIdx === 0 ? '0.5' : '1'
         }}
@@ -98,7 +98,7 @@ export const CollapsingCard = ({ title, images, route, description }: CardProps)
           </p>
           <Button 
             content="View More"
-            onClick={() => navigate(route)}
+            onClick={() => navigate(id)}
           />
         </div>
       </div>
