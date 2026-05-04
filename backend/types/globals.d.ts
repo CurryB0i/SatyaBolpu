@@ -61,3 +61,10 @@ export interface IEvent extends Document {
 export interface ITag extends Document {
   tag: string;
 };
+
+export type CardDataType = {
+  id: string;
+  title: string;
+  images: string[];
+  description: string;
+};

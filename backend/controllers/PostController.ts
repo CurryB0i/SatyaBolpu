@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Post } from '../models/Post.js';
 import { Tag } from '../models/Tag.js';
 import { Culture } from '../models/Culture.js';
+import { CardDataType } from '../types/globals.js';
 
 export const uploadPost = async (req: Request, res: Response) => {
   try {
@@ -45,12 +46,28 @@ export const uploadPost = async (req: Request, res: Response) => {
 
 export const getPosts = async (req: Request, res: Response) => {
   try {
-    const posts = await Post.find();
+    const limit = Number(req.query.limit) || 10;
+    const skip = ((Number(req.query.page) || 1) - 1) * limit;
+
+    const posts: CardDataType[] = 
+      (await Post
+        .find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+      ).map(d => ({
+        id: d._id as string,
+        title: d.shortTitle,
+        images: [d.image],
+        description: d.description
+      }));
+    const total = await Post.countDocuments();
+
     if(!posts) {
       return res.status(500).json({ msg: 'No posts found.' });
     }
 
-    return res.status(200).json({ posts });
+    return res.status(200).json({ posts, total, totalPages: Math.ceil(total/limit) });
   } catch(err: any) {
     console.error('Error while fetching posts: ', err.message);
     return res.status(500).json({ msg: 'Internal Server error while fetching posts.' });
