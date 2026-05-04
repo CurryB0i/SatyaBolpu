@@ -63,8 +63,8 @@ export const signup = async (req: Request, res: Response) => {
 
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: process.env.NODE_ENV === 'production' ? "strict" : "lax",
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000
     });
 
@@ -117,8 +117,8 @@ export const login = async (req: Request,res: Response) => {
 
   res.cookie("jwt", refreshToken, {
     httpOnly: true,
-    secure: false,
-    sameSite: process.env.NODE_ENV === 'production' ? "strict" : "lax",
+    secure: process.env.NODE_ENV === "production" ? true : false,
+    sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax",
     maxAge: 24 * 60 * 60 * 1000
   });
 
