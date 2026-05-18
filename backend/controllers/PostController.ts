@@ -430,7 +430,13 @@ export const uploadPost = async (req: AuthRequest, res: Response) => {
       userId,
       ...details,
       content,
-      location
+      location: {
+        type: "Point",
+        district: location.district,
+        taluk: location.taluk,
+        village: location.village,
+        coordinates: [location.lat, location.lng]
+      }
     });
 
     await PostGroup.updateOne(
