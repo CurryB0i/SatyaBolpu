@@ -27,6 +27,11 @@ import Cultures from './pages/Cultures'
 import NewEvent from './pages/Admin/NewEvent'
 import { Mode } from './types/enums'
 import EventDetails from './pages/Admin/EventDetails'
+import Drafts from './pages/Admin/Drafts'
+import Others from './pages/Admin/Others'
+import NewPostType from './pages/Admin/NewPostType'
+import NewPostGroup from './pages/Admin/NewPostGroup'
+import Events from './pages/Events'
 export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 gsap.registerPlugin(ScrollTrigger);
@@ -75,30 +80,35 @@ function App() {
         }}
       />
       <Routes>
-        <Route path='/' element={<Home/>}/>
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/signup' element={<SignUp/>}/>
-        <Route path='/profile' element={<Profile/>}/>
-        <Route path='/dashboard' element={<Dashboard />}/>
-        <Route path='/explore' element={<Explore/>}/>
-        <Route path='/cultures' element={<Cultures />}/>
-        <Route path='/cultures/:culture' element={<Culture/>}/>
-        <Route path='/posts' element={<Posts />}/>
-        <Route path='/posts/:postId' element={<Post />}/>
-        <Route path='/create' element={<Create />}/>
-        <Route path='/create/post' element={<NewPost />}/>
-        <Route path='/create/post/details' element={<PostDetails/>}/>
-        <Route path='/create/post/editor' element={<Editor mode={Mode.POST} />}/>
-        <Route path='/create/post/map' element={<MAP editMode={Mode.POST}/>}/>
-        <Route path='/create/culture' element={<NewCulture />}/>
-        <Route path='/create/culture/details' element={<CultureDetails />}/>
-        <Route path='/create/culture/editor' element={<Editor mode={Mode.CULTURE} />}/>
-        <Route path='/create/event' element={<NewEvent />}/>
-        <Route path='/create/event/details' element={<EventDetails />}/>
-        <Route path='/create/event/map' element={<MAP editMode={Mode.EVENT} />}/>
-        <Route path='/create/tag' element={<NewTag />}/>
-        <Route path='/map' element={<MAP/>}/>
-        <Route path='*' element={<NotFound/>}/>
+        <Route path='/' element={<Home />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/signup' element={<SignUp />} />
+        <Route path='/profile' element={<Profile />} />
+        <Route path='/dashboard' element={<Dashboard />} />
+        <Route path='/explore' element={<Explore />} />
+        <Route path='/cultures' element={<Cultures />} />
+        <Route path='/cultures/:culture' element={<Culture />} />
+        <Route path='/posts' element={<Posts />} />
+        <Route path='/posts/:postId' element={<Post />} />
+        <Route path='/events' element={<Events />} />
+        <Route path='/create' element={<Create />} />
+        <Route path='/create/others' element={<Others />} />
+        <Route path='/create/draft' element={<Drafts />} />
+        <Route path='/create/post/:id' element={<NewPost />} />
+        <Route path='/create/post/:id/details' element={<PostDetails />} />
+        <Route path='/create/post/:id/editor' element={<Editor mode={Mode.POST} />} />
+        <Route path='/create/post/:id/map' element={<MAP editMode={Mode.POST} />} />
+        <Route path='/create/culture/:id' element={<NewCulture />} />
+        <Route path='/create/culture/:id/details' element={<CultureDetails />} />
+        <Route path='/create/culture/:id/editor' element={<Editor mode={Mode.CULTURE} />} />
+        <Route path='/create/event/:id' element={<NewEvent />} />
+        <Route path='/create/event/:id/details' element={<EventDetails />} />
+        <Route path='/create/event/:id/map' element={<MAP editMode={Mode.EVENT} />} />
+        <Route path='/create/tag' element={<NewTag />} />
+        <Route path='/create/post-type' element={<NewPostType />} />
+        <Route path='/create/post-group' element={<NewPostGroup />} />
+        <Route path='/map' element={<MAP />} />
+        <Route path='*' element={<NotFound />} />
       </Routes>
     </>
   )

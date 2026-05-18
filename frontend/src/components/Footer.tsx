@@ -4,12 +4,12 @@ import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
   return (
-    <div className='footer relative w-screen flex flex-col gap-10 bg-black border-t-slate-800 border-t-2 border-solid p-10 select-none z-[9995]'>
+    <div className='footer relative w-screen flex flex-col gap-10 bg-black border-t-slate-800 border-t-2 border-solid p-10 select-none z-9995'>
       <div className='w-full flex flex-col items-center justify-center gap-5'>
         <img className='w-20 object-cover' src="/assets/logoen.png" alt="logo" />
         <div className='text-primary text-center'>
           <div className='text-[2rem]/[2rem] font-black'>SatyaBolpu</div>
-          <div className='[font-style:italic]'>Tuluva Satya Chitta</div>
+          <div className='italic'>Tuluva Satya Chitta</div>
         </div>
       </div>
 

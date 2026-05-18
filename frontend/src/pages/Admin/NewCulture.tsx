@@ -1,136 +1,89 @@
 import { useEffect, useState } from "react";
 import Button from "../../components/Button";
 import Title from "../../components/Title";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useDialog } from "../../context/DialogBoxContext";
 import useApi from "../../hooks/useApi";
-import { clearEntityStore, getFile } from "../../utils/FileStore";
 import ProgressBar from "../../components/ProgressBar";
-import { useCulture } from "../../context/CultureContext";
 import { toast } from "react-toastify";
 import { CultureState } from "../../types/globals";
+import { validateCultureDetails } from "../../utils/validate";
 
 const NewCulture = () => {
   
+  const { id } = useParams();
+
   const [progress,setProgress] = useState<number>(0);
+  const [cultureState, setCultureState] = useState<CultureState | null>(null);
+
   const dialog = useDialog();
-  const uploadMultipleApi = useApi('/upload/multiple',{ auto: false });
-  const uploadSingleApi = useApi('/upload/single',{ auto: false });
+  const draftsApi = useApi('/drafts', { auto: false });
   const culturesApi = useApi('/cultures', { auto: false })
   const { state: authState } = useAuth();
-  const { state: cultureState, dispatch: cultureDispatch } = useCulture();
 
   const steps = {
     'Culture Details': 'details',
     'Editor': 'editor',
   };
 
+  useEffect(() => {
+    const fetchDraft = async () => {
+      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: 'GET' });
+      if (!res) return;
+      setCultureState({
+        details: validateCultureDetails(res.draft.details) ? res.draft.details : null,
+        content: res.draft.content ?? ''
+      });
+    }
+
+    fetchDraft();
+  }, [id]);
+
   const handleUpload = () => {
     const uploadCulture = async () => {
-      let uploadData: CultureState = cultureState;
-
-      if(!cultureState.details) return;
-
-      if (cultureState.details.coverImages.length > 0) {
-        const files = await Promise.all(
-          cultureState.details.coverImages.map(async (coverImage) => {
-            return await getFile({ entity: "culture", type: "details" },Number(coverImage));
-          })
-        );
-        const validFiles = files.filter((f): f is File => f !== null);
-        if (validFiles.length > 0) {
-          const formData = new FormData();
-          validFiles.forEach((file) => {
-            formData.append("files", file);
-          });
-          const res = await uploadMultipleApi.post(formData);
-          uploadData = {
-            ...uploadData,
-            details: { ...uploadData.details!, coverImages: res.paths },
-          };
-        }
+      if(!cultureState) return;
+      const res = await culturesApi.refetch({ endpoint: '/cultures', method: 'POST', body: cultureState });
+      if(res) {
+        toast.success(`Culture-${res.culture.title} successfully uploaded.`)
+        draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "DELETE" });
+        setCultureState(null);
       }
-
-      if (cultureState.details.galleryImages.length > 0) {
-        const files = await Promise.all(
-          cultureState.details.galleryImages.map(async (galleryImage) => {
-            return await getFile({ entity: "culture", type: "details" },Number(galleryImage));
-          })
-        );
-        const validFiles = files.filter((f): f is File => f !== null);
-        if (validFiles.length > 0) {
-          const formData = new FormData();
-          validFiles.forEach((file) => {
-            formData.append("files", file);
-          });
-          const res = await uploadMultipleApi.post(formData);
-          uploadData = {
-            ...uploadData,
-            details: { ...uploadData.details!, galleryImages: res.paths },
-          };
-        }
-      }
-
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(cultureState.content, "text/html");
-      const body = doc.body;
-
-      for (let i = 0; i < body.children.length; i++) {
-        const child = body.children[i];
-
-        if (child.className.includes("file")) {
-          const fileEl = child.querySelector<HTMLElement>("[data-idbkey]");
-          if (fileEl) {
-            const idbKey = fileEl.getAttribute("data-idbkey");
-            if (!idbKey) continue;
-            const file = await getFile({ entity: "culture", type: "editor" },Number(idbKey));
-            if (!file) continue;
-            const formData = new FormData();
-            formData.append("file", file);
-            const res = await uploadSingleApi.post(formData);
-            fileEl.setAttribute("src", res.path);
-            fileEl.removeAttribute("data-idbkey");
-          }
-        }
-      }
-
-      uploadData = { ...uploadData, content: body.innerHTML };
-      await culturesApi.post(uploadData);
     }
 
     dialog.popup({
       title: "Culture Upload.",
       description:
-        "Are you sure you want to add this culture? All saved drafts will be cleared on upload.",
+        "Are you sure you want to add this culture? The saved draft will be cleared on upload.",
       onConfirm: uploadCulture,
     });
   }
 
   useEffect(() => {
-    if(culturesApi.data) {
-       toast.success(`Culture-${culturesApi.data.culture.name} successfully uploaded.`)
-       cultureDispatch({
-         type: 'CLEAR_CULTURE'
-       });
-       (async () => await clearEntityStore({ entity: "culture" }))();
+    if (culturesApi.error) {
+      toast.error(culturesApi.error);
+      console.error(culturesApi.error);
     }
-    if(culturesApi.error) console.log(culturesApi.error)
-  },[culturesApi.data, culturesApi.error])
+
+    if(draftsApi.error) {
+      toast.error(draftsApi.error);
+      console.error(draftsApi.error);
+    }
+  }, [culturesApi.error, draftsApi.error]);
 
   const handleClearProgress = async () => {
-    cultureDispatch({
-      type: 'CLEAR_CULTURE'
-    });
-    await clearEntityStore({ entity: "culture" });
+    await culturesApi.refetch({ endpoint: `/cultures/draft/${id}/details`, method: "DELETE" });
+    await culturesApi.refetch({ endpoint: `/cultures/draft/${id}/content`, method: "DELETE" });
   }
   
   if(!authState.token || authState.user?.role !== 'admin')
     return <Navigate to={'/404'} replace/>
 
+  if(!cultureState) return;
+
   return (
     <div className="mt-20 mb-40 flex flex-col gap-20 items-center justify-center">
-      <Title title={cultureState.details ? `New Culture - ${cultureState.details.name}` : 'New Draft Culture'}/>
+      <Title title={cultureState.details ? `New Culture - ${cultureState.details.title}` : 'New Draft Culture'}/>
       
       <div className="w-full flex flex-col items-center justify-center gap-20">
         <ProgressBar 
@@ -146,9 +99,7 @@ const NewCulture = () => {
                 content="Upload Culture" 
                 onClick={handleUpload}
                 loading={
-                  culturesApi.loading ||        
-                  uploadMultipleApi.loading || 
-                  uploadSingleApi.loading
+                  culturesApi.loading     
                 }
                 loadingText="Uploading"
               />

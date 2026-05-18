@@ -8,7 +8,6 @@ const AudioComponent = (props: NodeViewProps) => {
 
   const audioEl = (
     <audio
-      data-idbkey={node.attrs.idbKey}
       ref={audioRef}
       controls
       className="w-full"

@@ -1,16 +1,37 @@
 import mongoose, { Schema } from "mongoose";
-import { ILocation, IPost } from "../types/globals.js";
+import { IPost } from "../types/globals.js";
 
-export const locationSchema = new Schema<ILocation>({
-  district: { type: String, required: true },
-  taluk: { type: String },
-  village: { type: String, required: true },
-  lat: { type: Number, required: true },
-  lng: { type: Number, required: true },
+export const locationSchema = new Schema({
+  type: {
+    type: String,
+    enum: ["Point"],
+    required: true,
+    default: "Point"
+  },
+
+  coordinates: {
+    type: [Number],
+    required: true
+  },
+
+  district: {
+    type: String,
+    required: true
+  },
+  taluk: String,
+  village: {
+    type: String,
+    required: true
+  }
 }, { _id: false });
 
 const postSchema = new Schema<IPost>({
-  mainTitle: {
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  title: {
     type: String,
     required: true
   },
@@ -21,6 +42,16 @@ const postSchema = new Schema<IPost>({
   culture: {
     type: Schema.Types.ObjectId,
     ref: 'Culture',
+    required: true
+  },
+  postGroup: {
+    type: Schema.Types.ObjectId,
+    ref: 'PostGroup',
+    required: true
+  },
+  postType: {
+    type: Schema.Types.ObjectId,
+    ref: 'PostType',
     required: true
   },
   description: {
@@ -50,9 +81,10 @@ const postSchema = new Schema<IPost>({
   }
 }, { timestamps: true });
 
-postSchema.index({ culture: 1 });
+postSchema.index({ postGroup: 1 });
+postSchema.index({ postType: 1 });
 postSchema.index({ tags: 1 });
 postSchema.index({ createdAt: -1 });
-postSchema.index({ "location.lng": 1, "location.lat": 1 });
+postSchema.index({ location: "2dsphere" });
 
 export const Post = mongoose.model<IPost>('Post',postSchema);

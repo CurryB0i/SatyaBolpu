@@ -7,5 +7,7 @@ export enum Mode {
 export enum CardType {
   NORMAL_CARD,
   ROTATING_CARD,
-  COLLAPSING_CARD
+  COLLAPSING_CARD,
+  MINIMAL_CARD,
+  POST_GROUP_CARD
 };

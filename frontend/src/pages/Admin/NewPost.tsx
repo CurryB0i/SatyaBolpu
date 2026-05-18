@@ -1,127 +1,119 @@
 import { useEffect, useMemo, useState } from "react";
 import Button from "../../components/Button";
 import Title from "../../components/Title";
-import { usePost } from "../../context/PostContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useDialog } from "../../context/DialogBoxContext";
 import useApi from "../../hooks/useApi";
-import { clearEntityStore, getFile } from "../../utils/FileStore";
 import ProgressBar from "../../components/ProgressBar";
 import { toast } from "react-toastify";
 import { PostState } from "../../types/globals";
-import { BASE_URL } from "../../App";
+import { validatePostDetails } from "../../utils/validate";
 
 const NewPost = () => {
-  
-  const [progress,setProgress] = useState<number>(0);
+
+  const { id } = useParams();
+
+  const [progress, setProgress] = useState<number>(0);
+  const [postState, setPostState] = useState<PostState | null>(null);
+
   const dialog = useDialog();
-  const uploadApi = useApi('/upload/single',{ auto: false });
+  const uploadApi = useApi('/upload/single', { auto: false });
+  const draftsApi = useApi('/drafts', { auto: false });
   const postsApi = useApi('/posts', { auto: false })
+  const navigate = useNavigate();
   const { state: authState } = useAuth();
-  const { state: postState, dispatch: postDispatch } = usePost();
+
+  useEffect(() => {
+    const fetchDraft = async () => {
+      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: 'GET' });
+      if (!res) return;
+      setPostState({
+        details: validatePostDetails(res.draft.details) ? res.draft.details : null,
+        content: res.draft.content ?? '',
+        location: res.draft.location ?? null
+      });
+    }
+
+    fetchDraft();
+  }, [id]);
 
   const steps = useMemo(() => ({
     'Post Details': 'details',
     'Editor': 'editor',
-    ...(postState.details?.locationSpecific && { 'Map Details': 'map' })
-  }), [postState.details?.locationSpecific]);
+    ...(postState?.details?.locationSpecific && { 'Map Details': 'map' })
+  }), [postState?.details?.locationSpecific]);
 
   const handleUpload = () => {
     const uploadPost = async () => {
-      let uploadData: PostState = postState;
-
-      if (postState.details?.image) {
-        const file = await getFile({ entity: "post", type: "details" },Number(postState.details.image));
-        if (file) {
-          const formData = new FormData();
-          formData.append("file", file);
-          const res = await uploadApi.post(formData);
-          uploadData = {
-            ...uploadData,
-            details: { ...uploadData.details!, image: res.path },
-          };
-        }
+      if (!postState) return;
+      const res = await postsApi.refetch({ endpoint: '/posts', method: 'POST', body: postState });
+      if (res) {
+        toast.success(`Post-${res.post.title} successfully uploaded.`)
+        draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "DELETE" });
+        navigate('/create');
       }
-
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(postState.content, "text/html");
-      const body = doc.body;
-
-      for (let i = 0; i < body.children.length; i++) {
-        const child = body.children[i];
-        if (child.className.includes("file")) {
-          const fileEl = child.querySelector<HTMLElement>("[data-idbkey]");
-          if (fileEl) {
-            const idbKey = fileEl.getAttribute("data-idbkey");
-            if (!idbKey) continue;
-            const file = await getFile({ entity: "post", type: "editor" }, Number(idbKey));
-            if (!file) continue;
-            const formData = new FormData();
-            formData.append("file", file);
-            const res = await uploadApi.post(formData);
-            fileEl.setAttribute("src", `${BASE_URL}${res.path}`);
-            fileEl.removeAttribute("data-idbkey");
-          }
-        }
-      }
-
-      uploadData = { ...uploadData, content: body.innerHTML };
-      await postsApi.post(uploadData);
-    };
+    }
 
     dialog.popup({
       title: "Post Upload.",
       description:
-        "Are you sure you want to upload the post? All saved drafts will be cleared on upload.",
+        "Are you sure you want to add this post? The saved draft will be cleared on upload.",
       onConfirm: uploadPost,
     });
   };
 
   useEffect(() => {
-    if(postsApi.data) {
-       toast.success(`Post-${postsApi.data.post.shortTitle} successfully uploaded.`)
-       postDispatch({
-         type: 'CLEAR_POST'
-       });
-       (async () => await clearEntityStore({ entity: "post" }))();
+    if (postsApi.error) {
+      toast.error(postsApi.error);
+      console.error(postsApi.error);
     }
-    if(postsApi.error) console.log(postsApi.error)
-  },[postsApi.data, postsApi.error])
+
+    if(draftsApi.error) {
+      toast.error(draftsApi.error);
+      console.error(draftsApi.error);
+    }
+
+    if(uploadApi.error) {
+      toast.error(uploadApi.error);
+      console.error(uploadApi.error);
+    }
+  }, [postsApi.error, draftsApi.error, uploadApi.error]);
 
   const handleClearProgress = async () => {
-    postDispatch({
-      type: 'CLEAR_POST'
-    });
-    await clearEntityStore({ entity: "post" });
+    await postsApi.refetch({ endpoint: `/posts/draft/${id}/details`, method: "DELETE" });
+    await postsApi.refetch({ endpoint: `/posts/draft/${id}/content`, method: "DELETE" });
+    await postsApi.refetch({ endpoint: `/posts/draft/${id}/location`, method: "DELETE" });
   }
-  
-  if(!authState.token || authState.user?.role !== 'admin')
-    return <Navigate to={'/404'} replace/>
+
+  if (!authState.token || authState.user?.role !== 'admin')
+    return <Navigate to={'/404'} replace />
+
+  if (!postState) return;
 
   return (
     <div className="mt-20 mb-40 flex flex-col gap-20 items-center justify-center">
-      <Title title={postState.details ? `New Post - ${postState.details.mainTitle}` : 'New Draft Post'}/>
-      
+      <Title title={postState.details ? `New Post - ${postState.details.title}` : 'New Draft Post'} />
+
       <div className="w-full flex flex-col items-center justify-center gap-20">
-        <ProgressBar 
-          progress={progress} 
-          setProgress={setProgress} 
-          state={postState} 
+        <ProgressBar
+          progress={progress}
+          setProgress={setProgress}
+          state={postState}
           steps={steps}
         />
         <div className="flex gap-10">
           {
             progress > 100 &&
-              <Button 
-                content="Upload Post" 
-                onClick={handleUpload}
-                loading={postsApi.loading || uploadApi.loading}
-                loadingText="Uploading"
-              />
+            <Button
+              content="Upload Post"
+              onClick={handleUpload}
+              loading={postsApi.loading || uploadApi.loading}
+              loadingText="Uploading"
+            />
           }
-          
-          <Button 
+
+          <Button
             content="Clear Progress"
             onClick={handleClearProgress}
           />

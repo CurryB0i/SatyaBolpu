@@ -1,5 +1,7 @@
 import { LatLngBoundsExpression, LatLngExpression } from "leaflet";
 import { CardType } from "../components/CardList";
+import { ReactNode } from "react";
+import { FilterGroups } from "../components/Filters";
 
 export type Image = {
   src: string;
@@ -7,7 +9,7 @@ export type Image = {
 };
 
 export type ButtonProps = {
-  content: string;
+  content: ReactNode;
   className?: string;
   index?: number;
   ref?: React.RefObject<HTMLButtonElement[]> | React.RefObject<HTMLButtonElement>;
@@ -18,20 +20,56 @@ export type ButtonProps = {
   loadingText?: string;
 };
 
-export type CardProps = {
-  id: string;
-  title: string;
-  images: string[];
-  description: string;
-  handleEdit: (id: string) => void
+export type BaseCardProps = {
+  id: string,
+  handleEdit?: (id: string) => {},
+  handleDelete?: (id: string) => {}
 };
 
-export type CardListProps = {
-  cardType: CardType,
+export type MinimalCardProps = BaseCardProps & {
+  title: string;
+}
+
+export type NormalCardProps = BaseCardProps & {
+  title: string,
+  description: string,
+  image: string;
+}
+
+export type CollapsingCardProps = BaseCardProps & {
+  title: string,
+  description: string,
+  images: string[]
+}
+
+export type RotatingCardProps = BaseCardProps & {
+  title: string,
+  description: string,
+  image: string
+}
+
+export type PostGroupProps = BaseCardProps & {
+  name: string;
+  posts: {
+    id: string,
+    title: string
+  }[];
+}
+
+export type CardListProps<T> = {
+  Card: React.ComponentType<T>,
+  SkeletonCard: React.ComponentType,
   apiEndpoint: string,
-  orientation: 'row' | 'column',
-  cardsPerPage: number,
-  handleEdit: (id: string) => void
+  dataKey: string,
+  isPosts?: boolean,
+  selectFields?: string,
+  orientation: "row" | "column",
+  cardsPerPage?: number,
+  handleEdit?: (id: string) => void,
+  handleDelete?: (id: string) => void,
+  pagination?: boolean,
+  filterGroups?: FilterGroups;
+  sortOptions?: Record<string, string>
 };
 
 export type FormFieldOption = {
@@ -42,7 +80,7 @@ export type FormFieldOption = {
 export type FormField = {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'password' | 'textarea' | 'select' | 'file' | 'url' | 'number' | 'radio';
+  type: "text" | "email" | "password" | "textarea" | "select" | "file" | "url" | "number" | "radio";
   placeholder?: string;
   required?: boolean;
   options?: FormFieldOption[];
@@ -96,7 +134,7 @@ export type User = {
     dialCode: string;
     number: string;
   } | null;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
   verified: boolean;
 };
 
@@ -115,25 +153,23 @@ export type AuthState = {
 };
 
 export type AuthAction =
-  | { type: 'LOGIN'; payload: { user: User; token: string } }
-  | { type: 'LOGOUT' }
-  | { type: 'REFRESH_START' }
-  | { type: 'REFRESH_SUCCESS'; payload: { user: User; token: string } }
-  | { type: 'REFRESH_FAILED' };
+  | { type: "LOGIN"; payload: { user: User; token: string } }
+  | { type: "LOGOUT" }
+  | { type: "REFRESH_START" }
+  | { type: "REFRESH_SUCCESS"; payload: { user: User; token: string } }
+  | { type: "REFRESH_FAILED" };
 
 export type AuthContextType = {
   state: AuthState;
   dispatch: React.Dispatch<AuthAction>;
 };
 
-export type CultureType = "daivaradhane" | "nagaradhane" | "kambala" | "yakshagana";
-
 export type CultureDetailsType = {
-  name: string;
+  title: string;
   descriptiveName: string;
   description: string;
-  coverImages: string[] | File[] | number[];
-  galleryImages: string[] | File[] | number[];
+  coverImages: string[] | File[];
+  galleryImages: string[] | File[];
 };
 
 export type CultureState = {
@@ -142,11 +178,11 @@ export type CultureState = {
 };
 
 export type CultureAction = 
-  | { type: 'SAVE_CULTURE_DETAILS', payload: { details: CultureDetailsType }  }
-  | { type: 'CLEAR_CULTURE_DETAILS' }
-  | { type: 'SAVE_EDITOR_CONTENT', payload: { content: string } }
-  | { type: 'CLEAR_EDITOR_CONTENT' }
-  | { type: 'CLEAR_CULTURE' };
+  | { type: "SAVE_CULTURE_DETAILS", payload: { details: CultureDetailsType }  }
+  | { type: "CLEAR_CULTURE_DETAILS" }
+  | { type: "SAVE_EDITOR_CONTENT", payload: { content: string } }
+  | { type: "CLEAR_EDITOR_CONTENT" }
+  | { type: "CLEAR_CULTURE" };
 
 export type CultureDispatch = React.Dispatch<CultureAction>;
 
@@ -174,13 +210,15 @@ export type LoadingContextType = {
 };
 
 export type PostDetailsType = {
-  mainTitle: string;
+  title: string;
   shortTitle: string;
-  culture: CultureType | null;
+  culture: string;
+  postGroup: string;
+  postType: string;
   description: string;
   tags: string[];
   locationSpecific: boolean;
-  image: File | number | string | null;
+  image: File | string | null;
 };
 
 export type PostState = {
@@ -190,14 +228,14 @@ export type PostState = {
 };
 
 export type PostAction =
-  | { type: 'SAVE_POST_DETAILS' , payload: { details: PostDetailsType } }
-  | { type: 'CLEAR_POST_DETAILS' }
-  | { type: 'SAVE_EDITOR_CONTENT', payload: { content: string } }
-  | { type: 'CLEAR_EDITOR_CONTENT' }
-  | { type: 'SAVE_LOCATION', payload: { location: Location } }
-  | { type: 'CLEAR_LOCATION' }
-  | { type: 'SAVE_POST', payload: { post: PostState } }
-  | { type: 'CLEAR_POST' };
+  | { type: "SAVE_POST_DETAILS" , payload: { details: PostDetailsType } }
+  | { type: "CLEAR_POST_DETAILS" }
+  | { type: "SAVE_EDITOR_CONTENT", payload: { content: string } }
+  | { type: "CLEAR_EDITOR_CONTENT" }
+  | { type: "SAVE_LOCATION", payload: { location: Location } }
+  | { type: "CLEAR_LOCATION" }
+  | { type: "SAVE_POST", payload: { post: PostState } }
+  | { type: "CLEAR_POST" };
 
 export type PostDispatch = React.Dispatch<PostAction>;
 
@@ -207,14 +245,14 @@ export type PostContextType = {
 };
 
 export type EventDetailsType = {
-  name: string;
+  title: string;
   description: string;
   duration: {
     start: Date | null,
     end: Date | null
   },
-  culture: CultureType | null;
-  docs: string[] | File[] | number[]
+  culture: string;
+  docs: string[] | File[]
 }
 
 export type EventState = {
@@ -223,11 +261,11 @@ export type EventState = {
 };
 
 export type EventAction =
-  | { type: 'SAVE_EVENT_DETAILS' , payload: { details: EventDetailsType } }
-  | { type: 'CLEAR_EVENT_DETAILS' }
-  | { type: 'SAVE_LOCATION', payload: { location: Location } }
-  | { type: 'CLEAR_LOCATION' }
-  | { type: 'CLEAR_EVENT' }
+  | { type: "SAVE_EVENT_DETAILS" , payload: { details: EventDetailsType } }
+  | { type: "CLEAR_EVENT_DETAILS" }
+  | { type: "SAVE_LOCATION", payload: { location: Location } }
+  | { type: "CLEAR_LOCATION" }
+  | { type: "CLEAR_EVENT" }
 
 export type EventDispatch = React.Dispatch<EventAction>;
 
@@ -258,7 +296,7 @@ export type LoginProps = {
 };
 
 export interface ICulture {
-  name: string;
+  title: string;
   descriptiveName: string;
   description: string;
   coverImages: string[];
@@ -276,9 +314,11 @@ export interface ILocation {
 };
 
 export interface IPost {
-  mainTitle: string;
+  title: string;
   shortTitle: string;
   culture: string;
+  postGroup: string;
+  postType: string;
   description: string;
   tags: string[];
   image: string;
@@ -287,7 +327,7 @@ export interface IPost {
 };
 
 export interface IEvent {
-  name: string;
+  title: string;
   description: string;
   duration: {
     start: Date,
@@ -298,9 +338,24 @@ export interface IEvent {
   location: ILocation
 };
 
-export type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export interface ITag {
+  _id: string;
+  tag: string;
+}
 
-export interface ApiOptions extends Omit<RequestInit, 'body' | 'method'> {
+export interface IPostType {
+  _id: string;
+  name: string;
+}
+
+export interface IPostGroup {
+  _id: string;
+  name: string;
+}
+
+export type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
+export interface ApiOptions extends Omit<RequestInit, "body" | "method"> {
   method?: Method;
   endpoint?: string;
   body?: any;

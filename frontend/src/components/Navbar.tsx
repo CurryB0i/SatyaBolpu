@@ -154,7 +154,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`z-[9999] text-white w-screen flex p-3 md:p-7 items-center justify-between transition-transform duration-500
+        className={`z-9999 text-white w-screen flex p-3 md:p-7 items-center justify-between transition-transform duration-500
           ${isCollapsed ? '-translate-y-full' : 'translate-y-0'}`}
         style={navbarStyles}
         ref={navbarRef}
@@ -204,7 +204,7 @@ const Navbar = () => {
 
       <div
         className={`links lg:hidden text-xl font-semibold text-white text-center bg-black w-screen
-            overflow-hidden flex flex-col items-center justify-center gap-3 fixed top-0 right-0 z-[9998]
+            overflow-hidden flex flex-col items-center justify-center gap-3 fixed top-0 right-0 z-9998
             transition-all duration-500 ${isMenuOpen ? 'h-screen' : 'h-0'}`}
         ref={menuRef}
       >
@@ -214,7 +214,7 @@ const Navbar = () => {
       {
         isCollapsed &&
           <div
-            className='fixed bg-primary w-full h-4 z-[9999] flex justify-center'
+            className='fixed bg-primary w-full h-4 z-9999 flex justify-center'
             onClick={() => setCollapsed(false)}
           >
             <IoIosArrowDropdownCircle size={'30px'} className='bg-primary rounded-full cursor-pointer'/>

@@ -7,6 +7,6 @@ const tagSchema = new Schema<ITag>({
     required: true,
     unique: true
   }
-});
+}, { timestamps: true });
 
 export const Tag = mongoose.model('Tag',tagSchema);

@@ -72,14 +72,14 @@ useLayoutEffect(() => {
             <div className="w-[95%] md:w-2/3 lg:w-1/2 flex flex-col items-center justify-center bg-black/70
               rounded-2xl p-3 gap-5">
               <div className="text-[2.5rem] sm:text-[2.75rem] md:text-[3rem] font-black">
-                <h1>{culture.name}</h1>
+                <h1>{culture.title}</h1>
               </div>
               <div className="w-full text-justify">
                 <p>{culture.description}</p>
               </div>
               <Button 
                 content="Explore"
-                onClick={() => navigate(`/cultures/${culture.name.toLowerCase()}`)}
+                onClick={() => navigate(`/cultures/${culture.title.toLowerCase()}`)}
               />
             </div>
         </div> 

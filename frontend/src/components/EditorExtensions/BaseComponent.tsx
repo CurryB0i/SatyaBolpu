@@ -1,10 +1,5 @@
 import { NodeViewWrapper } from '@tiptap/react';
 import { useRef, useState, useEffect, ReactNode } from 'react';
-import { Node as ProseMirrorNode } from 'prosemirror-model';
-
-export type NodeProps = {
-  node: ProseMirrorNode
-};
 
 interface BaseComponentProps {
   node: {

@@ -19,7 +19,7 @@ const Button: React.FC<ButtonProps> = ({
         `p-2 rounded-md border hover:bg-white hover:text-black transition flex
         items-center justify-center gap-2 text-primary font-semibold cursor-pointer
         text-[0.75rem] md:text-[1rem]
-        ${theme === 'light' ? 'bg-white hover:text-white hover:bg-black' : 'bg-black hover:text-black hover:bg-white'}
+        ${theme === 'light' ? 'bg-white hover:text-white hover:bg-primary' : 'bg-black hover:text-black hover:bg-primary'}
         disabled:cursor-not-allowed disabled:scale-100 disabled:bg-primary/70 disabled:text-white`,
         className
       )}
@@ -31,7 +31,7 @@ const Button: React.FC<ButtonProps> = ({
         if(ref.current && typeof index === "number" && Array.isArray(ref.current)) {
           ref.current[index] = el;
         } else {
-          (ref as React.MutableRefObject<HTMLButtonElement>).current = el;
+          (ref as React.RefObject<HTMLButtonElement>).current = el;
         }
       }}
     >

@@ -173,7 +173,7 @@ const Culture = () => {
                     className="stroke-primary"
                     style={{ fontSize: 'clamp(2rem,10vw,10rem)' }}
                   >
-                    {cultureData.name}
+                    {cultureData.title}
                   </text>
                 </svg>
             </div>

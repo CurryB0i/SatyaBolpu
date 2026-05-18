@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { IDuration, IEvent } from '../types/globals.js';
 import { locationSchema } from './Post.js';
 
-const durationSchema = new Schema<IDuration>({
+export const durationSchema = new Schema<IDuration>({
   start: {
     type: Date,
     required: true
@@ -14,7 +14,7 @@ const durationSchema = new Schema<IDuration>({
 });
 
 const eventSchema = new Schema<IEvent>({
-  name: {
+  title: {
     type: String,
     required: true,
   },
@@ -38,6 +38,6 @@ const eventSchema = new Schema<IEvent>({
     type: locationSchema,
     required: true
   }
-});
+}, { timestamps: true });
 
 export const Event = mongoose.model<IEvent>('Event', eventSchema);

@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { IoIosArrowUp } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
-import { CardProps } from "../types/globals";
 import Button from "./Button";
+import { CollapsingCardProps } from "../types/globals";
 
 export const CollapsingSkeletonCard = () => (
   <div className="flex flex-col w-[90%] lg:w-2/3 border border-solid border-white rounded-lg
@@ -18,7 +18,7 @@ export const CollapsingSkeletonCard = () => (
   </div>
 );
 
-export const CollapsingCard = ({ id, title, images, description }: CardProps) => {
+export const CollapsingCard = ({ id, title, images, description }: CollapsingCardProps) => {
   const [showMoreIdx, setShowMoreIdx] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const descriptionRef = useRef<HTMLDivElement>(null);

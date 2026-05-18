@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { CardProps } from "../types/globals";
+import { NormalCardProps } from "../types/globals";
 import Button from "./Button";
 import { BASE_URL } from "../App";
 import { RiEdit2Fill } from "react-icons/ri";
@@ -16,7 +16,7 @@ export const NormalSkeletonCard = () => (
   </div>
 );
 
-export const NormalCard = ({ id, title, description, images, handleEdit }: CardProps) => {
+export const NormalCard = ({ id, title, description, image, handleEdit }: NormalCardProps) => {
   const navigate = useNavigate();
   const { state: authState } = useAuth();
 
@@ -25,7 +25,7 @@ export const NormalCard = ({ id, title, description, images, handleEdit }: CardP
       <div className="w-[40%] h-full md:w-1/3 overflow-hidden flex items-center justify-center">
         <img 
           className="w-full h-full object-cover object-center" 
-          src={`${BASE_URL}${images[0]}`} 
+          src={`${BASE_URL}${image}`} 
           alt={title}
         />
       </div>
@@ -44,7 +44,7 @@ export const NormalCard = ({ id, title, description, images, handleEdit }: CardP
               <div
                 className="border-primary text-primary border rounded-lg p-1 hover:bg-white 
                   hover:text-black cursor-pointer"
-                onClick={() => handleEdit(id)}
+                onClick={() => handleEdit?.(id)}
               >
                 <RiEdit2Fill 
                   className="text-[1.5rem] md:text-[2rem]"

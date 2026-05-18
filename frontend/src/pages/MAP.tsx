@@ -1,5 +1,5 @@
 import { Marker, GeoJSON } from "react-leaflet";
-import { ChangeEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Layer, LeafletMouseEvent, Map, Polygon, Tooltip } from "leaflet";
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 import { useLoading } from "../context/LoadingContext";
@@ -8,12 +8,10 @@ import Button from "../components/Button";
 import { MdCancel } from "react-icons/md";
 import { FaMagnifyingGlassLocation } from "react-icons/fa6";
 import { IoMdDoneAll } from "react-icons/io";
-import { usePost } from "../context/PostContext";
 import { toast } from "react-toastify";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Location } from "../types/globals";
 import { Mode } from "../types/enums";
-import { useEvent } from "../context/EventContext";
 import { FaChevronCircleLeft } from "react-icons/fa";
 
 //this is beacuse icons dont load in prod, some bs idk
@@ -22,6 +20,8 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import useApi from "../hooks/useApi";
+import { validateEventDetails, validatePostDetails } from "../utils/validate";
 
 //the below line is because someone caches something
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -44,30 +44,65 @@ const initialLocation = {
   lng: null
 };
 
-const MAP = ({ editMode } : { editMode?: Mode }) => {
-  const mapRef = useRef<HTMLDivElement | null>(null);
-  const { state: postState, dispatch: postDispatch } = usePost();
-  const { state: eventState, dispatch: eventDispatch } = useEvent();
+const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
+  const { id } = useParams();
+
+  // const [postState, setPostState] = useState<PostState | null>(null);
+  // const [eventState, setEventState] = useState<EventState | null>(null);
   const [map, setMap] = useState<Map | null>(null);
-  const [geoJsonData, setGeoJsonData] = useState<{ [key: string]: any }>({});
   const [lock, setLock] = useState<boolean>(false);
   const [zoom, setZoom] = useState<number>(9);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
+  const [activeVillage, setActiveVillage] = useState<GeoJSON.Feature | null>(null);
+  const [askForCoordinates, setAskForCoordinates] = useState<boolean>(false);
+  const [coordinateErrors, setCoordinateErrors] = useState<coordinatesErrorType>({ lat: '', lng: '' });
+  const [location, setLocation] = useState<Location>(initialLocation);
+  const [showMenu, setShowMenu] = useState<boolean>(true);
+  const [geoJsonData, setGeoJsonData] = useState<{ [key: string]: any }>({});
+  
+  const mapRef = useRef<HTMLDivElement | null>(null);
   const toolTipPane = useRef<Element>(null);
   const activeLayerRef = useRef<Polygon | null>(null);
-  const [activeVillage,setActiveVillage] = useState<GeoJSON.Feature | null>(null);
-  const [askForCoordinates,setAskForCoordinates] = useState<boolean>(false);
-  const [coordinateErrors,setCoordinateErrors] = useState<coordinatesErrorType>({lat: '', lng: ''});
-  const [location,setMapDetails] = useState<Location>(initialLocation);
-  const [showMenu, setShowMenu] = useState<boolean>(true);
+
   const { setLoading } = useLoading();
   const navigate = useNavigate();
+  const draftsApi = useApi('/drafts', { auto: false });
+  const postsApi = useApi('/posts', { auto: false });
+  const eventsApi = useApi('/events', { auto: false });
 
-  useLayoutEffect(() => {
-    if(postState.location) {
-      setMapDetails(postState.location);
+  useEffect(() => {
+    if(editMode === undefined) return;
+
+    const fetchDraft = async () => {
+      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: 'GET' });
+      if (!res) return;
+      if (editMode === Mode.EVENT) {
+        console.log(res.draft)
+        if (!validateEventDetails(res.draft.details)) {
+          navigate(`/create/event/${id}/details`);
+        } else {
+          // setEventState({
+          //   details: res.draft.details,
+          //   location: res.draft.location ?? null
+          // });
+          setLocation(res.draft.location ?? initialLocation);
+        }
+      } else if (editMode === Mode.POST) {
+        if (!validatePostDetails(res.draft.details)) {
+          navigate(`/create/post/${id}/details`);
+        } else {
+          // setPostState({
+          //   content: res.draft.content ?? '',
+          //   details: res.draft.details,
+          //   location: res.draft.location
+          // });
+          setLocation(res.draft.location ?? initialLocation);
+        }
+      }
     }
-  },[]);
+
+    fetchDraft();
+  }, [id]);
 
   useEffect(() => {
     const fetchGeoJson = async (name: string) => {
@@ -96,9 +131,9 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
   }, [map]);
 
   useEffect(() => {
-    if(map && zoom > 15)
+    if (map && zoom > 15)
       setActiveVillage(null);
-  },[zoom]);
+  }, [zoom]);
 
   useEffect(() => {
     const handleFullScreenChange = () => {
@@ -122,7 +157,7 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
 
   const handleMapReady = (mapInstance: Map) => {
     setMap(mapInstance);
-    
+
     const tooltips = document.querySelector(".leaflet-tooltip-pane");
     if (tooltips) {
       toolTipPane.current = tooltips;
@@ -159,7 +194,7 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
   };
 
   const onEachVillage = (feature: GeoJSON.Feature, layer: Layer) => {
-    if(layer instanceof Polygon) {
+    if (layer instanceof Polygon) {
       layer.setStyle(styles.default);
       layer.on({
         mouseover: (e: LeafletMouseEvent) => {
@@ -174,8 +209,8 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
               direction: "top",
               className: "global-tooltip"
             })
-            .setContent(feature.properties.VILLAGE)
-            .setLatLng(e.latlng);
+              .setContent(feature.properties.VILLAGE)
+              .setLatLng(e.latlng);
 
             if (map) {
               tooltip.addTo(map);
@@ -216,8 +251,8 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
                 direction: "top",
                 className: "global-tooltip permanent-tooltip"
               })
-              .setContent(feature.properties.VILLAGE)
-              .setLatLng(e.latlng);
+                .setContent(feature.properties.VILLAGE)
+                .setLatLng(e.latlng);
 
               permanentTooltip.addTo(map);
             }
@@ -228,11 +263,11 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
   };
 
   const districtKeys = ["dakshina_kannada", "udupi", "kasaragod"];
-  const onEachUniteractiveVillage = (feature: GeoJSON.Feature,layer: Layer) => {
-    if(editMode) {
+  const onEachUniteractiveVillage = (feature: GeoJSON.Feature, layer: Layer) => {
+    if (editMode !== undefined) {
       layer.on({
         click: (e: LeafletMouseEvent) => {
-          setMapDetails({
+          setLocation({
             district: feature.properties?.DISTRICT,
             taluk: feature.properties?.TALUK,
             village: feature.properties?.VILLAGE,
@@ -246,7 +281,7 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
 
   const uninteractiveVillageLayers = useMemo(() => (
     <>
-      {districtKeys.map((key) => 
+      {districtKeys.map((key) =>
         geoJsonData[key] && (
           <GeoJSON
             key={`u${key}`}
@@ -266,7 +301,7 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
 
   const villageLayers = useMemo(() => (
     <>
-      {districtKeys.map((key) => 
+      {districtKeys.map((key) =>
         geoJsonData[key] && (
           <GeoJSON
             key={key}
@@ -293,58 +328,59 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
   // }
 
   const handleView = () => {
-    if(map && activeVillage) {
-      const [xmin,ymin,xmax,ymax] = activeVillage.bbox!;
-      map.flyTo([(ymin+ymax)/2, (xmin+xmax)/2], 14)
+    if (map && activeVillage) {
+      console.log(activeVillage)
+      const [xmin, ymin, xmax, ymax] = activeVillage.bbox!;
+      map.flyTo([(ymin + ymax) / 2, (xmin + xmax) / 2], 14)
     }
   }
 
-   const handleCoordinateChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleCoordinateChange = (e: ChangeEvent<HTMLInputElement>) => {
     setCoordinateErrors((prev) => ({
       ...prev,
-      [name] : ''
+      [name]: ''
     }))
 
-    const {name, value} = e.target;
+    const { name, value } = e.target;
 
-    if(isNaN(Number(value)))
+    if (isNaN(Number(value)))
       return
 
-    setMapDetails((prev) => ({
+    setLocation((prev) => ({
       ...prev,
-      [name] : value
+      [name]: value
     }))
   };
 
   const pointInPolygon = (point: number[], polygon: number[][]) => {
     const x = point[0], y = point[1];
     let inside = false;
-    
+
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
       const xi = polygon[i][0], yi = polygon[i][1];
       const xj = polygon[j][0], yj = polygon[j][1];
-      
+
       if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
         inside = !inside;
       }
     }
-    
+
     return inside;
   };
 
   const findLayerContainingCoordinates = (lat: number, lng: number, geoJsonData: any) => {
     const point = [lng, lat];
     const districtKeys = ["dakshina_kannada", "udupi", "kasaragod"];
-    
+
     for (const key of districtKeys) {
       const data = geoJsonData[key];
       if (!data || !data.features) continue;
-      
+
       for (const feature of data.features) {
         if (!feature.geometry) continue;
-        
+
         const { geometry } = feature;
-        
+
         if (geometry.type === 'Polygon') {
           const coordinates = geometry.coordinates[0];
           if (pointInPolygon(point, coordinates)) {
@@ -380,11 +416,11 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
       lng: ''
     }
 
-    if(!location.lat) {
+    if (!location.lat) {
       newErrors.lat = 'Latitude is required.'
     }
 
-    if(!location.lng) {
+    if (!location.lng) {
       newErrors.lng = 'Longitude is required.'
     }
 
@@ -393,22 +429,22 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
       [11.98870273390581, 76.19727859282375],
     ];
 
-    if(location.lat && (location.lat! > maxBounds[0][0] || location.lat! < maxBounds[1][0])) {
+    if (location.lat && (location.lat! > maxBounds[0][0] || location.lat! < maxBounds[1][0])) {
       newErrors.lat = 'Latitude exceeds max bounds.'
     }
 
-    if(location.lng && (location.lng! > maxBounds[1][1] || location.lng! < maxBounds[0][1])) {
+    if (location.lng && (location.lng! > maxBounds[1][1] || location.lng! < maxBounds[0][1])) {
       newErrors.lng = 'Longitude exceeds max bounds.'
     }
 
     setCoordinateErrors(newErrors);
     const hasError = Object.values(newErrors).some(err => err !== '');
-    if(hasError)
+    if (hasError)
       return
 
     const containingLayer = findLayerContainingCoordinates(
-      location.lat!, 
-      location.lng!, 
+      location.lat!,
+      location.lng!,
       geoJsonData
     );
 
@@ -417,7 +453,7 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
     }
 
     map?.flyTo([location.lat!, location.lng!], 18);
-    setMapDetails((prev) => ({
+    setLocation((prev) => ({
       ...prev,
       district: containingLayer?.properties.DISTRICT,
       taluk: containingLayer?.properties.TALUK,
@@ -425,40 +461,30 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
     }));
   };
 
-  const handleSubmit = () => {
-    if(!location.district) {
+  const handleSubmit = async () => {
+    if (!location.district) {
       toast.error("You need to submit the location details first.")
       return;
     }
 
-    if(editMode === Mode.POST) {
-      postDispatch({
-        type: 'SAVE_LOCATION',
-        payload: {
-          location: location
-        }
-      });
-      setTimeout(() => navigate('/create/post'),3000)
-    } else if(editMode === Mode.EVENT) {
-      eventDispatch({
-        type: 'SAVE_LOCATION',
-        payload: {
-          location: location
-        }
-      });
-      setTimeout(() => navigate('/create/event'),3000)
+    if (editMode === Mode.POST) {
+      await postsApi.refetch({ endpoint: `/posts/draft/${id}/location`, method: "POST", body: { location } })
+      setTimeout(() => navigate(`/create/post/${id}`), 3000)
+    } else if (editMode === Mode.EVENT) {
+      await eventsApi.refetch({ endpoint: `/events/draft/${id}/location`, method: "POST", body: { location } })
+      setTimeout(() => navigate(`/create/event/${id}`), 3000)
     }
     toast.success("Location stored successfully.");
   }
 
-  if (editMode === Mode.EVENT && !eventState.details) {
-    return <Navigate to={'/create/event/details'} replace/>
-  } else if(editMode === Mode.POST && (!postState.content || !postState.details?.locationSpecific)) {
-    return <Navigate to={'/create/post/editor'} replace />
-  }
+  // if (editMode === Mode.EVENT && !eventState?.details) {
+  //   return <Navigate to={`/create/event/${id}/details`} replace />
+  // } else if (editMode === Mode.POST && (!postState?.content || !postState.details?.locationSpecific)) {
+  //   return <Navigate to={`/create/post/${id}/editor`} replace />
+  // }
 
   return (
-    <div 
+    <div
       className="w-screen h-screen relative"
       ref={mapRef}
     >
@@ -490,47 +516,47 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
       <div className="z-10 absolute flex flex-col justify-center items-center
         gap-2 right-0 top-16 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
         {fullScreen ? (
-          <AiOutlineFullscreenExit 
-            className="text-white text-[2.5rem] stroke-2 hover:scale-110" 
-            onClick={() => setFullScreen(false)} 
+          <AiOutlineFullscreenExit
+            className="text-white text-[2.5rem] stroke-2 hover:scale-110"
+            onClick={() => setFullScreen(false)}
           />
         ) : (
-          <AiOutlineFullscreen 
-            className="text-white text-[2.5rem] stroke-2 hover:scale-110" 
-            onClick={() => setFullScreen(true)} 
+          <AiOutlineFullscreen
+            className="text-white text-[2.5rem] stroke-2 hover:scale-110"
+            onClick={() => setFullScreen(true)}
           />
         )}
         {
-          editMode &&
-            <IoMdDoneAll
-              className={`text-[2.5rem] 
+          editMode !== undefined && location &&
+          <IoMdDoneAll
+            className={`text-[2.5rem] 
                 ${location.district ? 'text-white hover:scale-110' : 'cursor-not-allowed text-gray-400'}`}
-              onClick={handleSubmit}
-            />
+            onClick={handleSubmit}
+          />
         }
       </div>
 
       {
-        editMode && (
-          !fullScreen && !askForCoordinates ?
+        editMode !== undefined && (
+          !askForCoordinates ?
             (
-              <div 
+              <div
                 className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white hover:scale-105 
-                  p-2 rounded-xl hover:bg-primary text-back cursor-pointer text-[2rem]" 
-                onClick={() => setAskForCoordinates(true)} 
+                  p-2 rounded-xl hover:bg-primary text-back cursor-pointer text-[2rem]"
+                onClick={() => setAskForCoordinates(true)}
               >
-                <FaMagnifyingGlassLocation className=""/>
+                <FaMagnifyingGlassLocation className="" />
               </div>
             ) :
 
             (
-              <form 
+              <form
                 className="absolute w-1/3 flex flex-col gap-3 left-5 top-1/2 -translate-y-1/2 z-10 bg-black
-                  p-6 rounded-xl text-back cursor-pointer" 
+                  p-6 rounded-xl text-back cursor-pointer"
                 onSubmit={handleCoordinatesSubmit}>
-                <MdCancel 
+                <MdCancel
                   size={'25px'}
-                  className="absolute top-3 right-3 fill-white hover:fill-primary" 
+                  className="absolute top-3 right-3 fill-white hover:fill-primary"
                   onClick={() => setAskForCoordinates(false)}
                 />
                 <div className="w-full flex flex-col items-center justify-between gap-2">
@@ -543,12 +569,12 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
                     autoComplete="off"
                     value={location?.lat ?? ''}
                     onChange={handleCoordinateChange}
-                  />        
+                  />
                   {coordinateErrors.lat && <p className="text-red-500">{coordinateErrors.lat}</p>}
                 </div>
                 <div className="w-full flex flex-col items-center justify-between gap-2">
                   <label className="text-white" htmlFor="lng">Longitude</label>
-                  <input 
+                  <input
                     className="p-1 bg-white w-4/5"
                     type="text"
                     id="lng"
@@ -559,10 +585,10 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
                   />
                   {coordinateErrors.lng && <p className="text-red-500">{coordinateErrors.lng}</p>}
                 </div>
-                <Button content="Find" type="submit" className="w-fit mx-auto"/>
+                <Button content="Find" type="submit" className="w-fit mx-auto" />
               </form>
             )
-          )
+        )
       }
 
       {
@@ -571,7 +597,7 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
              flex flex-col gap-2 rounded-2xl transition-all"
             style={{
               translate: showMenu ? '0 0 ' : '-100% 0'
-            }}   
+            }}
           >
             <FaChevronCircleLeft
               size={'20px'}
@@ -580,12 +606,12 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
               }}
               className="absolute top-1/2 -translate-y-1/2 -right-2 cursor-pointer hover:fill-primary
               transition-all"
-              onClick={() => setShowMenu(!showMenu)}/>
+              onClick={() => setShowMenu(!showMenu)} />
             <p className="text-center text-primary font-bold">{activeVillage.properties?.VILLAGE}</p>
             <p className="text-sm">District: {activeVillage.properties?.DISTRICT}</p>
             <p className="text-sm">Taluk: {activeVillage.properties?.TALUK || 'Unknown'}</p>
             <p className="text-sm">No of covered locations: {0}</p>
-            <Button content="View More" className="mx-auto text-sm" onClick={handleView}/>
+            <Button content="View More" className="mx-auto text-sm" onClick={handleView} />
           </div>
         )
       }
@@ -604,32 +630,32 @@ const MAP = ({ editMode } : { editMode?: Mode }) => {
         gestureHandling={!fullScreen}
       >
         {zoom >= 11 && (
-          zoom > 15 ? 
+          zoom > 15 ?
             uninteractiveVillageLayers
-              :
+            :
             villageLayers
         )}
         {
-          editMode && location.district &&
-            <Marker 
-              position={[location.lat!, location.lng!]}
-            />
+          editMode !== undefined && location.district &&
+          <Marker
+            position={[location.lat!, location.lng!]}
+          />
         }
         {
-          editMode && (
-            editMode === Mode.EVENT ? 
-            <div 
-              className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
+          editMode !== undefined && (
+            editMode === Mode.EVENT ?
+              <div
+                className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
                cursor-pointer hover:text-primary"
-              onClick={() => navigate('/create/event/details')}>
-              {`< Event Details`}
-            </div> :
-            <div 
-              className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
+                onClick={() => navigate(`/create/event/${id}/details`)}>
+                {`< Event Details`}
+              </div> :
+              <div
+                className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
                cursor-pointer hover:text-primary"
-              onClick={() => navigate('/create/post/editor')}>
-              {`< Editor`}
-            </div>
+                onClick={() => navigate(`/create/post/${id}/editor`)}>
+                {`< Editor`}
+              </div>
           )
         }
       </MapComponent>

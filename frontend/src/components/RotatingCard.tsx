@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
-import { CardProps } from "../types/globals";
+import { RotatingCardProps } from "../types/globals";
 
 export const RotatingSkeletonCard = () => (
     <div className="w-1/5 bg-gray-700 animate-pulse h-120 flex items-center justify-center rounded-xl" >
@@ -9,7 +9,7 @@ export const RotatingSkeletonCard = () => (
     </div>
 );
 
-const RotatingCard = ({ id, title, images, description }: CardProps) => {
+const RotatingCard = ({ id, title, image, description }: RotatingCardProps) => {
   const [clicked, setClicked] = useState(false);
   const navigate = useNavigate();
 
@@ -28,7 +28,7 @@ const RotatingCard = ({ id, title, images, description }: CardProps) => {
       >
         <div className="absolute w-full h-full bg-black text-white backface-hidden z-10
           rounded-2xl overflow-hidden border border-white border-solid">
-          <img src={images[0]} alt={title} className="w-full h-4/5 object-cover" />
+          <img src={image} alt={title} className="w-full h-4/5 object-cover" />
           <div className="h-1/5 flex items-center justify-center">
             <h3>{title}</h3>
           </div>

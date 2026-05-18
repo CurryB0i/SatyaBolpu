@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { ICulture } from '../types/globals.js';
 
 const cultureSchema = new Schema<ICulture>({
-  name: {
+  title: {
     type: String,
     required: true,
   },
@@ -25,11 +25,7 @@ const cultureSchema = new Schema<ICulture>({
   content: {
     type: String,
     required: true,
-  },
-  posts: {
-    type: Number,
-    required: true
   }
-});
+}, { timestamps: true });
 
 export const Culture = mongoose.model<ICulture>('Culture',cultureSchema);

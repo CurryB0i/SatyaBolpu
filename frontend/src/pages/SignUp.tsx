@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, SubmitEvent, useEffect, useState } from "react";
 import Button from "../components/Button";
 import PhoneInput, { CountryData } from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
@@ -107,12 +107,13 @@ const SignUp = () => {
     setStep(step);
   }
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     setButtonLoad(true);
     e.preventDefault();
     const newErrors = validateForm(3);
     if (Object.values(newErrors).some(err => err != '')) {
       setErrors(newErrors);
+      setButtonLoad(false);
       return;
     }
     await post(formData);
@@ -153,7 +154,7 @@ const SignUp = () => {
     <div className="w-screen min-h-screen text-primary flex flex-col items-center justify-center">
       <form
         onSubmit={handleSubmit}
-        className="w-[90%] md:w-2/3 lg:w-2/5 xl:w-1/3 border-[1px] border-white border-solid rounded-2xl 
+        className="w-[90%] md:w-2/3 lg:w-2/5 xl:w-1/3 border border-white border-solid rounded-2xl 
         flex flex-col items-center gap-8 px-6 py-10 bg-white/5 backdrop-blur-md shadow-lg"
       >
         <h1 className="text-[2.5rem] sm:text-[3rem] font-bold">Sign Up</h1>

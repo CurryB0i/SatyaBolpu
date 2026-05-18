@@ -1,18 +1,18 @@
-import { ChangeEvent, FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ChangeEvent, SubmitEvent, useEffect, useRef, useState } from "react";
 import Title from "../../components/Title";
-import { useCulture } from "../../context/CultureContext";
 import { useAuth } from "../../context/AuthContext";
-import { Navigate, useNavigate } from "react-router-dom";
-import { getFile, saveFile } from "../../utils/FileStore";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { FaEdit, FaUpload } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import Button from "../../components/Button";
 import { toast } from "react-toastify";
 import useApi from "../../hooks/useApi";
 import { CultureDetailsType, ICulture } from "../../types/globals";
+import { BASE_URL } from "../../App";
+import { validateCultureDetails } from "../../utils/validate";
 
 type FormErrorType = {
-  name: string;
+  title: string;
   descriptiveName: string;
   description: string;
   coverImages: string;
@@ -20,7 +20,7 @@ type FormErrorType = {
 };
 
 const initialFormData: CultureDetailsType = {
-  name: '',
+  title: '',
   descriptiveName: '',
   description: '',
   coverImages: [],
@@ -28,7 +28,7 @@ const initialFormData: CultureDetailsType = {
 };
 
 const initialFormErrors: FormErrorType = {
-  name: '',
+  title: '',
   descriptiveName: '',
   description: '',
   coverImages: '',
@@ -36,77 +36,78 @@ const initialFormErrors: FormErrorType = {
 };
 
 const CultureDetails = () => {
-  const [formData,setFormData] = useState<CultureDetailsType>(initialFormData);
-  const [errors,setErrors] = useState<FormErrorType>(initialFormErrors);
-  const [submitted, setSubmitted] = useState(false);
-  const [existingCultures,setExistingCultures] = useState<string[]>([]);
-  const [saving,setSaving] = useState<boolean>(false);
+  const { id } = useParams();
 
-  const culturesApi = useApi('/cultures');
+  const [formData, setFormData] = useState<CultureDetailsType>(initialFormData);
+  const [errors, setErrors] = useState<FormErrorType>(initialFormErrors);
+  const [submitted, setSubmitted] = useState(false);
+  const [existingCultures, setExistingCultures] = useState<string[]>([]);
+  const [saving, setSaving] = useState<boolean>(false);
+
+  const uploadMultipleApi = useApi('/upload/multiple', { auto: false });
+  const culturesApi = useApi('/cultures', { auto: false });
+  const draftsApi = useApi('/drafts', { auto: false });
   const { state: authState } = useAuth();
-  const { state: cultureState, dispatch: cultureDispatch } = useCulture();
   const navigate = useNavigate();
 
   const descrRef = useRef<HTMLTextAreaElement | null>(null);
 
-  useLayoutEffect(() => {
-    if (!cultureState.details) return;
-
-    const loadFiles = async () => {
-      const { coverImages, galleryImages, ...remainingCultureState } = cultureState.details!;
-      
-      let coverImagesFileObjs: File[] = [];
-      let galleryImagesFileObjs: File[] = [];
-      if(coverImages.length > 0) {
-        coverImagesFileObjs = (
-          await Promise.all(
-            coverImages.map((coverImage) => getFile({ entity: "culture", type: "details" },Number(coverImage)))
-          )
-        ).filter((file): file is File => file !== null);
+  useEffect(() => {
+    const fetchCultures = async () => {
+      const res = await culturesApi.refetch({ endpoint: '/cultures', method: 'GET' });
+      if (!res) return;
+      if (res && res?.cultures?.length > 0) {
+        setExistingCultures(res.cultures.map((c: ICulture) => c.title));
       }
+    }
 
-      if(galleryImages.length > 0) {
-        galleryImagesFileObjs = (
-          await Promise.all(
-            galleryImages.map((galleryImage) => getFile({ entity: "culture", type: "details" },Number(galleryImage)))
-          )
-        ).filter((file): file is File => file !== null);
-      }
-
-      setFormData({
-        coverImages: coverImagesFileObjs,
-        galleryImages: galleryImagesFileObjs,
-        ...remainingCultureState,
-      });
-
-      setSubmitted(true);
-    };
-
-    loadFiles();
-  }, [cultureState]);
+    fetchCultures();
+  }, []);
 
   useEffect(() => {
-    if(culturesApi.error) {
+    if (culturesApi.error) {
       toast.error(culturesApi.error);
+      console.error(culturesApi.error);
     }
-  },[culturesApi.error]);
+
+    if (draftsApi.error) {
+      toast.error(draftsApi.error);
+      console.error(draftsApi.error);
+    }
+
+    if (uploadMultipleApi.error) {
+      toast.error(uploadMultipleApi.error);
+      console.error(uploadMultipleApi.error);
+    }
+
+  }, [culturesApi.error, draftsApi.error, uploadMultipleApi.error]);
 
   useEffect(() => {
-    if(culturesApi.data) {
-      setExistingCultures(culturesApi.data.cultures.map((c: ICulture) => c.name.toLowerCase()));
+    const fetchDraft = async () => {
+      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
+      if (!res) return;
+      if (res.draft) {
+        setFormData(res.draft.details);
+        if (validateCultureDetails(res.draft.details)) {
+          setSubmitted(true);
+        }
+      } else
+        toast.error("Failed to fetch draft.");
     }
-  },[culturesApi.data]);
+
+    fetchDraft();
+  }, [id]);
 
   useEffect(() => {
     const el = descrRef.current;
     if (!el) return;
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight}px`;
-  },[formData.description]);
+  }, [formData.description]);
 
   useEffect(() => {
     return () => {
-      if(formData.coverImages.length > 0 && formData.galleryImages.length > 0) {
+      if (formData.coverImages.length > 0 && formData.galleryImages.length > 0) {
         formData.coverImages.forEach((file) => {
           if (file instanceof File) URL.revokeObjectURL(URL.createObjectURL(file));
         });
@@ -134,200 +135,211 @@ const CultureDetails = () => {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, files } = e.target;
     if (!files) return;
-    
-    console.log(e.target.value);
+
     setErrors((prev) => ({
       ...prev,
       [name]: ''
     }));
-    
+
     setFormData((prev) => ({
       ...prev,
       [name]: [
-        ...(prev[name as keyof CultureDetailsType] as File[]), 
+        ...(prev[name as keyof CultureDetailsType] as File[]),
         ...Array.from(files)
       ]
     }));
-    
-    setTimeout(() => e.target.value = '',0);
+
+    setTimeout(() => e.target.value = '', 0);
   };
 
-  const handleRemoveImage = (key: keyof CultureDetailsType,index: number) => {
+  const handleRemoveImage = (key: keyof CultureDetailsType, index: number) => {
     setFormData((prev) => ({
       ...prev,
-      [key]: (prev[key] as File[]).filter((_,id) => id !== index)
+      [key]: (prev[key] as File[]).filter((_, id) => id !== index)
     }))
   }
 
-  const handleFormSubmit = async (e: FormEvent) => {
+  const handleFormSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     setSaving(true);
     e.preventDefault();
     const newErrors: FormErrorType = {
-      name: '',
+      title: '',
       descriptiveName: '',
       description: '',
       coverImages: '',
       galleryImages: ''
     };
 
-    if(!formData.name.trim()) {
-      newErrors.name = "Culture name is required.";
+    if (!formData.title.trim()) {
+      newErrors.title = "Culture name is required.";
     }
 
-    if(formData.name && formData.name.length < 5) {
-      newErrors.name = "Culture name should be atleast 5 characters long.";
+    if (formData.title && formData.title.length < 5) {
+      newErrors.title = "Culture name should be atleast 5 characters long.";
     }
 
-    if(existingCultures.length > 0 && existingCultures.includes(formData.name.toLowerCase())) {
-      newErrors.name = "A Culture with this name already exists.";
+    if (existingCultures.length > 0 && existingCultures.some(c => c.toLowerCase() === formData.title.toLowerCase())) {
+      newErrors.title = "A Culture with this name already exists.";
       setErrors(newErrors);
       setSaving(false);
       return;
     }
 
-    if(!formData.descriptiveName.trim()) {
+    if (!formData.descriptiveName.trim()) {
       newErrors.descriptiveName = "Descriptive name is required.";
     }
 
-    if(formData.descriptiveName && formData.descriptiveName.length < 5) {
+    if (formData.descriptiveName && formData.descriptiveName.length < 5) {
       newErrors.descriptiveName = "Descriptive name should be atleast 5 characters long.";
     }
 
-    if(!formData.description.trim()) {
+    if (!formData.description.trim()) {
       newErrors.description = "Description is required.";
     }
 
-    if(formData.description && formData.description.split(' ').length < 100) {
+    if (formData.description && formData.description.split(' ').length < 100) {
       newErrors.description = "Description should be atleast 100 words long.";
     }
 
-    if(formData.coverImages.length < 4) {
+    formData.coverImages.filter((f): f is File => f !== null);
+    if (formData.coverImages.length < 3) {
       newErrors.coverImages = "Three cover images are required.";
     }
 
-    if(formData.galleryImages.length < 15) {
+    formData.galleryImages.filter((f): f is File => f !== null);
+    if (formData.galleryImages.length < 15) {
       newErrors.galleryImages = "Atleast 15 gallery images are required.";
     }
 
     setErrors(newErrors);
     const hasErrors = Object.values(newErrors).some(err => err !== '');
-    if(hasErrors) {
+    if (hasErrors) {
       setSaving(false)
-      return 
+      return;
     }
 
-    const coverImagesIdbKeys = (
-      await Promise.all(
-        formData.coverImages.map(async (coverImage) => {
-          if (coverImage instanceof File) {
-            return await saveFile({ entity: "culture", type: "details" },coverImage);
-          }
-          return null;
-        })
-      )
-    ).filter((key): key is number => key !== null);
+    let coverImages = [];
+    let galleryImages = [];
+    const coverImagesData = new FormData();
+    const galleryImagesData = new FormData();
 
-    const galleryImagesIdbKeys = (
-      await Promise.all(
-        formData.galleryImages.map(async (galleryImage) => {
-          if (galleryImage instanceof File) {
-            return await saveFile({ entity: "culture", type: "details" },galleryImage);
-          }
-          return null;
-        })
-      )
-    ).filter((key): key is number => key !== null);
-
-    cultureDispatch({
-      type: 'SAVE_CULTURE_DETAILS',
-      payload: {
-        details: {
-          ...formData,
-          coverImages: coverImagesIdbKeys,
-          galleryImages: galleryImagesIdbKeys
-        }
-      }
+    formData.coverImages.forEach(file => {
+      file instanceof File ?
+        coverImagesData.append("files", file as File) :
+        coverImages.push(file);
     });
+    formData.galleryImages.forEach(file => {
+      file instanceof File ?
+        galleryImagesData.append("files", file as File) :
+        galleryImages.push(file)
+    });
+
+    if (coverImagesData.getAll("files").length > 0) {
+      const res1 = await uploadMultipleApi.post(coverImagesData);
+      if (!res1) {
+        setSaving(false);
+        return;
+      }
+      coverImages.push(...res1.paths);
+    }
+    if (galleryImagesData.getAll("files").length > 0) {
+      const res2 = await uploadMultipleApi.post(galleryImagesData);
+      if (!res2) {
+        setSaving(false);
+        return;
+      }
+      galleryImages.push(...res2.paths);
+    }
+
+    const details = {
+      ...formData,
+      coverImages,
+      galleryImages
+    };
+    const res = await culturesApi.refetch({ endpoint: `/cultures/draft/${id}/details`, method: "POST", body: { details } });
+    if (!res) {
+      setSaving(false);
+      return
+    };
+
     setSubmitted(true);
     setSaving(false);
   };
 
-  const handleEditAgain = () => {
+  const handleEditAgain = async () => {
     setSubmitted(false);
-    cultureDispatch({
-      type: 'CLEAR_CULTURE_DETAILS',
-    });
+    await culturesApi.refetch({ endpoint: `/cultures/draft/${id}/details`, method: "DELETE" });
   }
 
   const handleNext = () => {
-    if(submitted) {
-      navigate('/create/culture/editor')
+    if (submitted) {
+      navigate(`/create/culture/${id}/editor`)
     } else {
       toast.error("You need to submit the form first!");
     }
   }
 
-  if(!authState.token || authState.user?.role !== 'admin') {
-    return <Navigate to={'/404'} replace/>
+  if (!authState.token || authState.user?.role !== 'admin') {
+    return <Navigate to={'/404'} replace />
   }
 
   return (
     <div className="w-full">
       <div className="my-20">
-        <Title title="New Culture"/>
+        <Title title="New Culture" />
       </div>
 
-      <form 
+      <form
         className="flex w-3/4 md:w-1/2 flex-col gap-10 items-center justify-center mx-auto my-20"
         onSubmit={handleFormSubmit}
       >
         <div className="flex flex-col w-full gap-3">
-          <label className="text-primary font-semibold text-[1.5rem]" htmlFor="mainTitle">
+          <label className="text-primary font-semibold text-[1.5rem]" htmlFor="title">
             Name
           </label>
-          <input 
-            className={`text-black font-semibold p-2 bg-white disabled:bg-gray-400`} 
-            type="text" 
-            id="name" 
+          <input
+            className={`text-black font-semibold p-2 bg-white disabled:bg-gray-400`}
+            type="text"
+            id="title"
             disabled={submitted}
-            name="name" 
-            value={formData.name}
+            name="title"
+            value={formData.title}
             onChange={handleFormChange}
           />
-            {errors.name && <p className="text-red-500">{errors.name}</p>}
+          {errors.title && <p className="text-red-500">{errors.title}</p>}
         </div>
 
         <div className="flex flex-col w-full gap-3">
-          <label className="text-primary font-semibold text-[1.5rem]" htmlFor="mainTitle">
+          <label className="text-primary font-semibold text-[1.5rem]" htmlFor="descriptiveName">
             Descriptive Name
           </label>
-          <input 
+          <input
             className={`text-black bg-white font-semibold p-2 disabled:bg-gray-400`}
             disabled={submitted}
-            type="text" 
-            id="descriptiveName" 
-            name="descriptiveName" 
+            type="text"
+            id="descriptiveName"
+            name="descriptiveName"
             value={formData.descriptiveName}
             onChange={handleFormChange}
           />
-            {errors.descriptiveName && <p className="text-red-500">{errors.descriptiveName}</p>}
+          {errors.descriptiveName && <p className="text-red-500">{errors.descriptiveName}</p>}
         </div>
 
         <div className="flex flex-col w-full gap-3">
-          <label className="text-primary font-semibold text-[1.5rem]" htmlFor="mainTitle">
+          <label className="text-primary font-semibold text-[1.5rem]" htmlFor="description">
             Description
           </label>
           <textarea
-            className={`text-black bg-white font-semibold p-2 disabled:bg-gray-400 resize-none`} 
+            className={`text-black bg-white font-semibold p-2 disabled:bg-gray-400 resize-none`}
             rows={1}
             disabled={submitted}
-            id="description" 
-            name="description" 
+            id="description"
+            name="description"
             ref={descrRef}
             value={formData.description}
             onChange={handleFormChange}
           />
-            {errors.description && <p className="text-red-500">{errors.description}</p>}
+          {errors.description && <p className="text-red-500">{errors.description}</p>}
         </div>
 
         <div className="flex flex-col w-full gap-3">
@@ -354,26 +366,24 @@ const CultureDetails = () => {
             onChange={handleFileChange}
           />
           <div className="flex flex-wrap text-white">
-          {
-            formData.coverImages.length > 0 && formData.coverImages.map((coverImage,index) => {
-              if(coverImage instanceof File) {
+            {
+              formData.coverImages.length > 0 && formData.coverImages.map((coverImage, index) => {
                 return (
-                <div className="w-1/2 border-2 border-solid border-white flex relative" key={index}>
-                  <img 
-                    className="w-full aspect-square object-cover object-center" 
-                    src={URL.createObjectURL(coverImage)} alt="cover-image" />
-                  {
-                    submitted &&
-                      <MdCancel 
+                  <div className="w-1/2 border-2 border-solid border-white flex relative" key={index}>
+                    <img
+                      className="w-full aspect-square object-cover object-center"
+                      src={coverImage instanceof File ? URL.createObjectURL(coverImage) : `${BASE_URL}${coverImage}`} alt="cover-image" />
+                    {
+                      !submitted &&
+                      <MdCancel
                         className="absolute bg-black rounded-full text-[1.5rem] top-2 right-2 cursor-pointer hover:text-primary"
-                        onClick={() => handleRemoveImage('coverImages',index)}
+                        onClick={() => handleRemoveImage('coverImages', index)}
                       />
-                  }
-                </div>
+                    }
+                  </div>
                 )
-              }
-            })
-          }
+              })
+            }
           </div>
           {errors.coverImages && <p className="text-red-500">{errors.coverImages}</p>}
         </div>
@@ -401,41 +411,38 @@ const CultureDetails = () => {
             onChange={handleFileChange}
           />
           <div className="flex flex-wrap text-white">
-          {
-            formData.galleryImages.length > 0 && formData.galleryImages.map((galleryImage,index) => {
-              if(galleryImage instanceof File) {
+            {
+              formData.galleryImages.length > 0 && formData.galleryImages.map((galleryImage, index) => {
                 return (
-                <div className="w-1/6 border-2 border-solid border-white flex relative" key={index}>
-                  <img 
-                    className="w-full aspect-square object-cover object-center" 
-                    src={URL.createObjectURL(galleryImage)} alt={`gallery-${index}`} />
-                  {
-                    submitted &&
-                      <MdCancel 
+                  <div className="w-1/6 border-2 border-solid border-white flex relative" key={index}>
+                    <img
+                      className="w-full aspect-square object-cover object-center"
+                      src={galleryImage instanceof File ? URL.createObjectURL(galleryImage) : `${BASE_URL}${galleryImage}`} alt={`gallery-${index}`} />
+                    {
+                      !submitted &&
+                      <MdCancel
                         className="absolute bg-black rounded-full top-2 right-2 cursor-pointer hover:text-primary"
-                        onClick={() => handleRemoveImage('galleryImages',index)}
+                        onClick={() => handleRemoveImage('galleryImages', index)}
                       />
-                  }
-                </div>
+                    }
+                  </div>
                 )
-              }
-              return null;
-            })
-          }
+              })
+            }
           </div>
           {errors.galleryImages && <p className="text-red-500">{errors.galleryImages}</p>}
         </div>
 
         {
 
-          submitted ? 
+          submitted ?
             <FaEdit
               className={`text-[2.5rem] cursor-pointer m-5 bg-black 
                          text-white hover:scale-110 hover:text-primary z-50`}
               id='edit'
-              onClick={handleEditAgain}/>
+              onClick={handleEditAgain} />
             :
-            <Button 
+            <Button
               content="Save"
               className="text-[1.5rem] mx-auto"
               type="submit"
@@ -447,17 +454,17 @@ const CultureDetails = () => {
       </form>
 
       <div className="flex w-screen items-center justify-between p-10">
-        <div 
+        <div
           className={`text-[1.2rem] sm:text-[1.75rem] hover:text-primary text-white cursor-pointer`}
-          onClick={() => navigate('/create/culture')}>
-            {`< Progress`}
+          onClick={() => navigate(`/create/culture/${id}`)}>
+          {`< Progress`}
         </div>
-        <div 
+        <div
           className={`text-[1.2rem] sm:text-[1.75rem]
           ${submitted ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
           onClick={handleNext}>
-            {`Editor >`}
-          </div>
+          {`Editor >`}
+        </div>
       </div>
 
     </div>

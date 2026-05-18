@@ -11,13 +11,6 @@ export const Audio = Node.create({
 
   addAttributes() {
     return {
-        idbKey: {
-          default: null,
-          parseHTML: (element: HTMLElement) => element.getAttribute('data-idbkey'),
-          renderHTML: (attributes: Record<string, any>) => ({
-            'data-idbkey': attributes.idbKey
-          })
-        },
         src: {
             default: null,
             parseHTML: (element: HTMLElement) => element.getAttribute('src'),
@@ -78,7 +71,6 @@ export const Audio = Node.create({
           return {
             src: img.getAttribute('src'),
             type: img.getAttribute('type'),
-            idbKey: img.getAttribute('data-idbkey') || null,
             width: element.getAttribute('width') || element.style.width || '300px',
             caption: captionEl?.textContent || '',
           };
@@ -89,7 +81,6 @@ export const Audio = Node.create({
         getAttrs: (element: HTMLElement) => ({
           src: element.getAttribute('src'),
           type: element.getAttribute('type'),
-          idbKey: element.getAttribute('data-idbkey'),
         })
       }
     ];
@@ -102,7 +93,6 @@ export const Audio = Node.create({
       [
         'audio',
         {
-          'data-idbkey': HTMLAttributes['data-idbkey'],
           src,
           type,
           controls,

@@ -1,4 +1,5 @@
-import { Document } from "mongoose";
+import { Request } from "express";
+import { Schema, Document } from "mongoose";
 
 export interface IPhone extends Document {
   dialCode: number;
@@ -16,32 +17,34 @@ export interface IUser extends Document {
 };
 
 export interface ICulture extends Document {
-  name: string;
+  title: string;
   descriptiveName: string;
   description: string;
   coverImages: string[];
   galleryImages: string[];
   content: string;
-  posts: number;
 };
 
 export interface ILocation extends Document {
+  type: "Point",
   district: string;
   taluk: string;
   village: string;
-  lat: number;
-  lng: number;
+  coordinates: number[2];
 };
 
 export interface IPost extends Document {
-  mainTitle: string;
-  shortTitle: string;
-  culture: Schema.Types.ObjectId;
-  description: string;
-  tags: Schema.Types.ObjectId[];
-  image: string;
-  content: string;
-  location?: ILocation;
+  userId: Schema.Types.ObjectId,
+  title: string,
+  shortTitle: string,
+  culture: Schema.Types.ObjectId,
+  postGroup: Schema.Types.ObjectId,
+  postType: Schema.Types.ObjectId,
+  description: string,
+  tags: Schema.Types.ObjectId[],
+  image: string,
+  content: string,
+  location?: ILocation
 };
 
 export interface IDuration extends Document {
@@ -50,7 +53,7 @@ export interface IDuration extends Document {
 };
 
 export interface IEvent extends Document {
-  name: string;
+  title: string;
   description: string;
   duration: IDuration;
   culture: Schema.Types.ObjectId;
@@ -62,9 +65,27 @@ export interface ITag extends Document {
   tag: string;
 };
 
+export interface IPostGroup extends Document {
+  name: string;
+  postCount: number;
+};
+
+export interface IPostType extends Document {
+  name: string
+}
+
+export interface IDraft extends Document  {
+  userId: Schema.Types.ObjectId,
+  type: 'post' | 'culture' | 'event'
+}
+
 export type CardDataType = {
   id: string;
   title: string;
-  images: string[];
+  images?: string[];
   description: string;
 };
+
+export interface AuthRequest extends Request {
+  user?: any;
+}

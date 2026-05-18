@@ -28,7 +28,7 @@ const Post = () => {
 
   return (
     <div className="w-screen relative flex-col items-center justify-center gap-10 bg-black py-20">
-      <Title title={post?.mainTitle ?? ''}/>
+      <Title title={post?.title ?? ''}/>
 
       <div 
         className='text-white text-[1.5rem] w-[90%] p-5 wrap-break-word whitespace-pre-wrap'

@@ -182,7 +182,7 @@ const MapComponent = ({
       )}
 
       <MapContainer
-        className="z-0 relative w-full h-full text-center"
+        className="z-0 relative w-full h-full"
         center={center}
         zoom={initialZoom}
         maxBounds={maxBounds}
