@@ -74,6 +74,7 @@ const NewCulture = () => {
   const handleClearProgress = async () => {
     await culturesApi.refetch({ endpoint: `/cultures/draft/${id}/details`, method: "DELETE" });
     await culturesApi.refetch({ endpoint: `/cultures/draft/${id}/content`, method: "DELETE" });
+    setCultureState(null);
   }
   
   if(!authState.token || authState.user?.role !== 'admin')

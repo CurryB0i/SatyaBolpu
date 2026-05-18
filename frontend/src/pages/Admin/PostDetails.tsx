@@ -296,7 +296,7 @@ const PostDetails = () => {
       newErrors.shortTitle = "Short Title should be at least 3 characters long!";
     }
 
-    if(!formData.culture.trim()) 
+    if(!formData.culture?.trim()) 
       newErrors.culture = 'Culture is required.';
 
     if (!formData.postGroup) {

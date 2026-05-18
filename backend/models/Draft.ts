@@ -28,6 +28,10 @@ export const postDraftSchema = new Schema<IPost & { locationSpecific: boolean }>
   shortTitle: {
     type: String
   },
+  culture: {
+    type: Schema.Types.ObjectId,
+    ref: 'Culture'
+  },
   postGroup: {
     type: Schema.Types.ObjectId,
     ref: 'PostGroup'

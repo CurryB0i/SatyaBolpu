@@ -106,6 +106,7 @@ export const getDraft = async (req: Request, res: Response) => {
         details: {
           title: d?.title ?? "",
           shortTitle: d?.shortTitle ?? "",
+          culture: d?.culture ?? "",
           postGroup: d?.postGroup ?? "",
           postType: d?.postType ?? "",
           description: d?.description ?? "",
